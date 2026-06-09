@@ -6,7 +6,7 @@
     <title>Репетиторы - УчебаВместе</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ----- ОРИГИНАЛЬНЫЕ СТИЛИ ----- */
+        /* ОРИГИНАЛЬНЫЕ СТИЛИ (как в первой версии) */
         :root {
             --bg: #f8fafc;
             --card: #ffffff;
@@ -74,11 +74,18 @@
             padding: 1.5rem;
             border-bottom: 1px solid var(--border);
         }
-        .teacher-avatar img {
+        .teacher-avatar {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            object-fit: cover;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            text-transform: uppercase;
         }
         .teacher-name { margin: 0 0 0.25rem; font-size: 1.25rem; }
         .teacher-subjects { color: var(--muted-fg); }
@@ -243,26 +250,28 @@
     </footer>
 
     <script>
-        // ======================= ДАННЫЕ С ЛОКАЛЬНЫМИ КАРТИНКАМИ =======================
+        // ======================= ДАННЫЕ =======================
         let tutors = [];
 
+        // Инициализация демо-данных (без дублирования)
         function initDemoTutors() {
             const stored = localStorage.getItem('ucheba_tutors');
             if (stored) {
                 tutors = JSON.parse(stored);
             } else {
                 tutors = [
-                    { id: 1, name: 'Анна Петрова', subjects: 'Математика, Физика', balance: 45000, email: 'anna@ucheba-vmeste.ru', avatar: 'img/Анна Петрова.png', status: 'active', accepting_students: true },
-                    { id: 2, name: 'Алексей Козлов', subjects: 'Физика, Математика', balance: 38500, email: 'alexey@ucheba-vmeste.ru', avatar: 'img/Алексей Козлов.png', status: 'active', accepting_students: true },
-                    { id: 3, name: 'Иван Сидоров', subjects: 'Английский язык', balance: 52300, email: 'ivan@ucheba-vmeste.ru', avatar: 'img/Иван Сидоров.png', status: 'active', accepting_students: false },
-                    { id: 4, name: 'Елена Смирнова', subjects: 'Химия, Биология', balance: 41200, email: 'elena@ucheba-vmeste.ru', avatar: 'img/Елена Смирнова.png', status: 'active', accepting_students: true },
-                    { id: 5, name: 'Мария Иванова', subjects: 'Русский язык, Литература', balance: 30000, email: 'maria@ucheba-vmeste.ru', avatar: 'img/Мария Иванова.png', status: 'active', accepting_students: true },
-                    { id: 6, name: 'Дмитрий Попов', subjects: 'Программирование, Математика', balance: 25000, email: 'dmitry@ucheba-vmeste.ru', avatar: 'img/Дмитрий Попов.png', status: 'active', accepting_students: false }
+                    { id: 1, name: 'Анна Петрова', subjects: 'Математика, Физика', balance: 45000, email: 'anna@ucheba-vmeste.ru', status: 'active', accepting_students: true, experience: '8 лет', students: 498 },
+                    { id: 2, name: 'Алексей Козлов', subjects: 'Физика, Математика', balance: 38500, email: 'alexey@ucheba-vmeste.ru', status: 'active', accepting_students: true, experience: '9 лет', students: 546 },
+                    { id: 3, name: 'Иван Сидоров', subjects: 'Английский язык', balance: 52300, email: 'ivan@ucheba-vmeste.ru', status: 'active', accepting_students: false, experience: '6 лет', students: 348 },
+                    { id: 4, name: 'Елена Смирнова', subjects: 'Химия, Биология', balance: 41200, email: 'elena@ucheba-vmeste.ru', status: 'active', accepting_students: true, experience: '10 лет', students: 432 },
+                    { id: 5, name: 'Мария Иванова', subjects: 'Русский язык, Литература', balance: 30000, email: 'maria@ucheba-vmeste.ru', status: 'active', accepting_students: true, experience: '7 лет', students: 389 },
+                    { id: 6, name: 'Дмитрий Попов', subjects: 'Программирование, Математика', balance: 25000, email: 'dmitry@ucheba-vmeste.ru', status: 'active', accepting_students: false, experience: '5 лет', students: 215 }
                 ];
                 localStorage.setItem('ucheba_tutors', JSON.stringify(tutors));
             }
         }
 
+        // Текущий пользователь
         let currentUser = null;
 
         function loadCurrentUser() {
@@ -306,7 +315,12 @@
             location.reload();
         }
 
-        // Отрисовка карточек с локальными картинками + fallback на инициалы
+        // Получение инициалов
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase();
+        }
+
+        // Отрисовка карточек (чистых, без дублирования)
         function renderTeachers() {
             const grid = document.getElementById('teachersGrid');
             if (!grid) return;
@@ -316,25 +330,23 @@
                 const btnDisabled = !isAccepting ? 'disabled' : '';
                 const btnTitle = !isAccepting ? 'Репетитор временно не принимает учеников' : '';
                 const notTakingHtml = !isAccepting ? '<span class="not-taking-text"><i class="fas fa-ban"></i> Не принимает новых учеников</span>' : '';
-                const avatarUrl = t.avatar || '';
-                // fallback: если картинка не загрузится, показываем инициалы
-                const fallbackInitials = t.name.split(' ').map(n => n[0]).join('').toUpperCase();
-                const onerror = `this.onerror=null; this.parentElement.innerHTML='<div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#1e40af);display:flex;align-items:center;justify-content:center;color:white;font-size:2rem;font-weight:bold;">${fallbackInitials}</div>';`;
+                const initials = getInitials(t.name);
+                const experience = t.experience || (Math.floor(Math.random()*8)+5) + ' лет';
+                const studentsCount = t.students || (Math.floor(Math.random()*400)+200);
+                
                 const card = document.createElement('div');
                 card.className = 'teacher-card';
                 card.innerHTML = `
                     <div class="teacher-card-header">
-                        <div class="teacher-avatar">
-                            <img src="${avatarUrl}" alt="${t.name}" onerror="${onerror}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
-                        </div>
+                        <div class="teacher-avatar">${initials}</div>
                         <div>
                             <h2 class="teacher-name">${t.name}</h2>
                             <p class="teacher-subjects">${t.subjects}</p>
                         </div>
                     </div>
                     <div class="teacher-stats">
-                        <div><div class="stat-value">${Math.floor(Math.random()*8)+5} лет</div><div>Опыт</div></div>
-                        <div><div class="stat-value">${Math.floor(Math.random()*400)+200}+</div><div>Учеников</div></div>
+                        <div><div class="stat-value">${experience}</div><div>Опыт</div></div>
+                        <div><div class="stat-value">${studentsCount}+</div><div>Учеников</div></div>
                     </div>
                     <p class="teacher-description">${t.name} — репетитор по ${t.subjects.split(',')[0]}, подготовка к экзаменам.</p>
                     <div class="teacher-actions">
