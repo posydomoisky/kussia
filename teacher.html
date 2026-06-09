@@ -6,27 +6,26 @@
     <title>Репетиторы - УчебаВместе</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ОРИГИНАЛЬНЫЕ СТИЛИ (как в первой версии) */
-        :root {
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --border: #e2e8f0;
-            --fg: #1e293b;
-            --muted-fg: #64748b;
-            --primary: #3b82f6;
-            --shadow: rgba(0,0,0,0.05);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--fg);
+            background: #f8fafc;
+            color: #1e293b;
             line-height: 1.5;
         }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        /* Header */
         header {
-            background: var(--card);
-            border-bottom: 1px solid var(--border);
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
             position: sticky;
             top: 0;
             z-index: 10;
@@ -39,21 +38,59 @@
             flex-wrap: wrap;
             gap: 1rem;
         }
-        .logo a { font-size: 1.5rem; font-weight: bold; text-decoration: none; color: var(--primary); }
-        nav { display: flex; gap: 1.5rem; }
-        nav a { text-decoration: none; color: var(--fg); font-weight: 500; }
-        .user-profile { display: flex; align-items: center; gap: 1rem; }
+        .logo a {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: #3b82f6;
+        }
+        nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+        nav a {
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 500;
+        }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
         .user-avatar {
-            width: 40px; height: 40px; background: var(--primary); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;
+            width: 40px;
+            height: 40px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
         }
         .btn {
-            padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; border: none;
-            font-weight: 500; transition: 0.2s;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            border: none;
+            font-weight: 500;
+            transition: 0.2s;
         }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--fg); }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
+        }
+        /* Сетка карточек */
         .teachers-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -61,18 +98,20 @@
             margin: 2rem 0;
         }
         .teacher-card {
-            background: var(--card);
+            background: white;
             border-radius: 1rem;
             overflow: hidden;
-            box-shadow: 0 4px 20px var(--shadow);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
             transition: transform 0.2s;
         }
-        .teacher-card:hover { transform: translateY(-4px); }
+        .teacher-card:hover {
+            transform: translateY(-4px);
+        }
         .teacher-card-header {
             display: flex;
             gap: 1rem;
             padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #e2e8f0;
         }
         .teacher-avatar {
             width: 80px;
@@ -87,19 +126,37 @@
             font-weight: bold;
             text-transform: uppercase;
         }
-        .teacher-name { margin: 0 0 0.25rem; font-size: 1.25rem; }
-        .teacher-subjects { color: var(--muted-fg); }
+        .teacher-name {
+            margin: 0 0 0.25rem;
+            font-size: 1.25rem;
+        }
+        .teacher-subjects {
+            color: #64748b;
+        }
         .teacher-stats {
             display: flex;
             justify-content: space-around;
-            background: var(--bg);
+            background: #f8fafc;
             padding: 0.75rem;
         }
-        .stat-value { font-size: 1.3rem; font-weight: bold; color: var(--primary); }
-        .teacher-description { padding: 1rem 1.5rem; }
-        .teacher-actions { padding: 0 1.5rem 1.5rem; display: flex; gap: 1rem; }
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        .teacher-description {
+            padding: 1rem 1.5rem;
+        }
+        .teacher-actions {
+            padding: 0 1.5rem 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
         .not-taking-text {
-            display: block; font-size: 0.85rem; padding: 0 1.5rem 1.5rem; color: #f59e0b;
+            display: block;
+            font-size: 0.85rem;
+            padding: 0 1.5rem 1.5rem;
+            color: #f59e0b;
         }
         /* Модальное окно */
         .modal {
@@ -115,56 +172,61 @@
             justify-content: center;
         }
         .modal-content {
-            background: var(--card);
+            background: white;
             width: 90%;
             max-width: 500px;
             border-radius: 1rem;
             box-shadow: 0 20px 30px rgba(0,0,0,0.2);
-            animation: fadeIn 0.2s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
         }
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #e2e8f0;
         }
         .modal-close {
             background: none;
             border: none;
             font-size: 1.8rem;
             cursor: pointer;
-            color: var(--muted-fg);
+            color: #64748b;
         }
-        .modal-body { padding: 1.5rem; }
+        .modal-body {
+            padding: 1.5rem;
+        }
         .modal-footer {
             padding: 1rem 1.5rem;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid #e2e8f0;
             display: flex;
             justify-content: flex-end;
             gap: 1rem;
         }
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
         .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 0.5rem;
-            border: 1px solid var(--border);
+            border: 1px solid #cbd5e1;
             border-radius: 0.5rem;
-            background: var(--bg);
-            color: var(--fg);
+            background: #f8fafc;
         }
-        .btn-secondary { background: #e2e8f0; color: var(--fg); }
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
         footer {
             text-align: center;
             padding: 2rem;
             margin-top: 3rem;
-            background: var(--card);
-            border-top: 1px solid var(--border);
+            background: white;
+            border-top: 1px solid #e2e8f0;
         }
     </style>
 </head>
@@ -196,7 +258,129 @@
                 <h1>Наши репетиторы</h1>
                 <p>Выберите подходящего репетитора из нашей команды профессионалов</p>
             </div>
-            <div class="teachers-grid" id="teachersGrid"></div>
+            <div class="teachers-grid">
+                <!-- Анна Петрова -->
+                <div class="teacher-card">
+                    <div class="teacher-card-header">
+                        <div class="teacher-avatar">АП</div>
+                        <div>
+                            <h2 class="teacher-name">Анна Петрова</h2>
+                            <p class="teacher-subjects">Математика, Физика</p>
+                        </div>
+                    </div>
+                    <div class="teacher-stats">
+                        <div><div class="stat-value">8 лет</div><div>Опыт</div></div>
+                        <div><div class="stat-value">498+</div><div>Учеников</div></div>
+                    </div>
+                    <p class="teacher-description">Анна Петрова — репетитор по математике и физике, подготовка к экзаменам.</p>
+                    <div class="teacher-actions">
+                        <button class="btn btn-primary" onclick="openBookingModal(1)">Записаться</button>
+                        <button class="btn btn-outline" onclick="viewProfile(1)">Профиль</button>
+                    </div>
+                </div>
+
+                <!-- Алексей Козлов -->
+                <div class="teacher-card">
+                    <div class="teacher-card-header">
+                        <div class="teacher-avatar">АК</div>
+                        <div>
+                            <h2 class="teacher-name">Алексей Козлов</h2>
+                            <p class="teacher-subjects">Физика, Математика</p>
+                        </div>
+                    </div>
+                    <div class="teacher-stats">
+                        <div><div class="stat-value">9 лет</div><div>Опыт</div></div>
+                        <div><div class="stat-value">546+</div><div>Учеников</div></div>
+                    </div>
+                    <p class="teacher-description">Алексей Козлов — репетитор по физике и математике, подготовка к экзаменам.</p>
+                    <div class="teacher-actions">
+                        <button class="btn btn-primary" onclick="openBookingModal(2)">Записаться</button>
+                        <button class="btn btn-outline" onclick="viewProfile(2)">Профиль</button>
+                    </div>
+                </div>
+
+                <!-- Иван Сидоров (не принимает учеников) -->
+                <div class="teacher-card">
+                    <div class="teacher-card-header">
+                        <div class="teacher-avatar">ИС</div>
+                        <div>
+                            <h2 class="teacher-name">Иван Сидоров</h2>
+                            <p class="teacher-subjects">Английский язык</p>
+                        </div>
+                    </div>
+                    <div class="teacher-stats">
+                        <div><div class="stat-value">6 лет</div><div>Опыт</div></div>
+                        <div><div class="stat-value">348+</div><div>Учеников</div></div>
+                    </div>
+                    <p class="teacher-description">Иван Сидоров — репетитор по английскому языку, подготовка к экзаменам.</p>
+                    <div class="teacher-actions">
+                        <button class="btn btn-primary" disabled title="Репетитор временно не принимает учеников">Записаться</button>
+                        <button class="btn btn-outline" onclick="viewProfile(3)">Профиль</button>
+                    </div>
+                    <span class="not-taking-text"><i class="fas fa-ban"></i> Не принимает новых учеников</span>
+                </div>
+
+                <!-- Елена Смирнова -->
+                <div class="teacher-card">
+                    <div class="teacher-card-header">
+                        <div class="teacher-avatar">ЕС</div>
+                        <div>
+                            <h2 class="teacher-name">Елена Смирнова</h2>
+                            <p class="teacher-subjects">Химия, Биология</p>
+                        </div>
+                    </div>
+                    <div class="teacher-stats">
+                        <div><div class="stat-value">10 лет</div><div>Опыт</div></div>
+                        <div><div class="stat-value">432+</div><div>Учеников</div></div>
+                    </div>
+                    <p class="teacher-description">Елена Смирнова — репетитор по химии и биологии, подготовка к экзаменам.</p>
+                    <div class="teacher-actions">
+                        <button class="btn btn-primary" onclick="openBookingModal(4)">Записаться</button>
+                        <button class="btn btn-outline" onclick="viewProfile(4)">Профиль</button>
+                    </div>
+                </div>
+
+                <!-- Мария Иванова -->
+                <div class="teacher-card">
+                    <div class="teacher-card-header">
+                        <div class="teacher-avatar">МИ</div>
+                        <div>
+                            <h2 class="teacher-name">Мария Иванова</h2>
+                            <p class="teacher-subjects">Русский язык, Литература</p>
+                        </div>
+                    </div>
+                    <div class="teacher-stats">
+                        <div><div class="stat-value">12 лет</div><div>Опыт</div></div>
+                        <div><div class="stat-value">425+</div><div>Учеников</div></div>
+                    </div>
+                    <p class="teacher-description">Мария Иванова — репетитор по русскому языку и литературе, подготовка к экзаменам.</p>
+                    <div class="teacher-actions">
+                        <button class="btn btn-primary" onclick="openBookingModal(5)">Записаться</button>
+                        <button class="btn btn-outline" onclick="viewProfile(5)">Профиль</button>
+                    </div>
+                </div>
+
+                <!-- Дмитрий Попов (не принимает учеников) -->
+                <div class="teacher-card">
+                    <div class="teacher-card-header">
+                        <div class="teacher-avatar">ДП</div>
+                        <div>
+                            <h2 class="teacher-name">Дмитрий Попов</h2>
+                            <p class="teacher-subjects">Программирование, Математика</p>
+                        </div>
+                    </div>
+                    <div class="teacher-stats">
+                        <div><div class="stat-value">5 лет</div><div>Опыт</div></div>
+                        <div><div class="stat-value">215+</div><div>Учеников</div></div>
+                    </div>
+                    <p class="teacher-description">Дмитрий Попов — репетитор по программированию и математике, подготовка к экзаменам.</p>
+                    <div class="teacher-actions">
+                        <button class="btn btn-primary" disabled title="Репетитор временно не принимает учеников">Записаться</button>
+                        <button class="btn btn-outline" onclick="viewProfile(6)">Профиль</button>
+                    </div>
+                    <span class="not-taking-text"><i class="fas fa-ban"></i> Не принимает новых учеников</span>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -250,26 +434,15 @@
     </footer>
 
     <script>
-        // ======================= ДАННЫЕ =======================
-        let tutors = [];
-
-        // Инициализация демо-данных (без дублирования)
-        function initDemoTutors() {
-            const stored = localStorage.getItem('ucheba_tutors');
-            if (stored) {
-                tutors = JSON.parse(stored);
-            } else {
-                tutors = [
-                    { id: 1, name: 'Анна Петрова', subjects: 'Математика, Физика', balance: 45000, email: 'anna@ucheba-vmeste.ru', status: 'active', accepting_students: true, experience: '8 лет', students: 498 },
-                    { id: 2, name: 'Алексей Козлов', subjects: 'Физика, Математика', balance: 38500, email: 'alexey@ucheba-vmeste.ru', status: 'active', accepting_students: true, experience: '9 лет', students: 546 },
-                    { id: 3, name: 'Иван Сидоров', subjects: 'Английский язык', balance: 52300, email: 'ivan@ucheba-vmeste.ru', status: 'active', accepting_students: false, experience: '6 лет', students: 348 },
-                    { id: 4, name: 'Елена Смирнова', subjects: 'Химия, Биология', balance: 41200, email: 'elena@ucheba-vmeste.ru', status: 'active', accepting_students: true, experience: '10 лет', students: 432 },
-                    { id: 5, name: 'Мария Иванова', subjects: 'Русский язык, Литература', balance: 30000, email: 'maria@ucheba-vmeste.ru', status: 'active', accepting_students: true, experience: '7 лет', students: 389 },
-                    { id: 6, name: 'Дмитрий Попов', subjects: 'Программирование, Математика', balance: 25000, email: 'dmitry@ucheba-vmeste.ru', status: 'active', accepting_students: false, experience: '5 лет', students: 215 }
-                ];
-                localStorage.setItem('ucheba_tutors', JSON.stringify(tutors));
-            }
-        }
+        // Данные репетиторов (для модального окна и проверки приёма)
+        const tutorsData = {
+            1: { name: 'Анна Петрова', subjects: 'Математика, Физика', accepting: true },
+            2: { name: 'Алексей Козлов', subjects: 'Физика, Математика', accepting: true },
+            3: { name: 'Иван Сидоров', subjects: 'Английский язык', accepting: false },
+            4: { name: 'Елена Смирнова', subjects: 'Химия, Биология', accepting: true },
+            5: { name: 'Мария Иванова', subjects: 'Русский язык, Литература', accepting: true },
+            6: { name: 'Дмитрий Попов', subjects: 'Программирование, Математика', accepting: false }
+        };
 
         // Текущий пользователь
         let currentUser = null;
@@ -306,7 +479,10 @@
             }
         }
 
-        function redirectToLogin() { window.location.href = 'login_simple.html'; }
+        function redirectToLogin() {
+            window.location.href = 'login_simple.html';
+        }
+
         function logout() {
             localStorage.removeItem('ucheba_current_user');
             currentUser = null;
@@ -315,67 +491,23 @@
             location.reload();
         }
 
-        // Получение инициалов
-        function getInitials(name) {
-            return name.split(' ').map(n => n[0]).join('').toUpperCase();
-        }
-
-        // Отрисовка карточек (чистых, без дублирования)
-        function renderTeachers() {
-            const grid = document.getElementById('teachersGrid');
-            if (!grid) return;
-            grid.innerHTML = '';
-            tutors.forEach(t => {
-                const isAccepting = t.accepting_students === true;
-                const btnDisabled = !isAccepting ? 'disabled' : '';
-                const btnTitle = !isAccepting ? 'Репетитор временно не принимает учеников' : '';
-                const notTakingHtml = !isAccepting ? '<span class="not-taking-text"><i class="fas fa-ban"></i> Не принимает новых учеников</span>' : '';
-                const initials = getInitials(t.name);
-                const experience = t.experience || (Math.floor(Math.random()*8)+5) + ' лет';
-                const studentsCount = t.students || (Math.floor(Math.random()*400)+200);
-                
-                const card = document.createElement('div');
-                card.className = 'teacher-card';
-                card.innerHTML = `
-                    <div class="teacher-card-header">
-                        <div class="teacher-avatar">${initials}</div>
-                        <div>
-                            <h2 class="teacher-name">${t.name}</h2>
-                            <p class="teacher-subjects">${t.subjects}</p>
-                        </div>
-                    </div>
-                    <div class="teacher-stats">
-                        <div><div class="stat-value">${experience}</div><div>Опыт</div></div>
-                        <div><div class="stat-value">${studentsCount}+</div><div>Учеников</div></div>
-                    </div>
-                    <p class="teacher-description">${t.name} — репетитор по ${t.subjects.split(',')[0]}, подготовка к экзаменам.</p>
-                    <div class="teacher-actions">
-                        <button class="btn btn-primary" onclick="openBookingModal(${t.id})" ${btnDisabled} title="${btnTitle}">Записаться</button>
-                        <button class="btn btn-outline" onclick="viewProfile(${t.id})">Профиль</button>
-                    </div>
-                    ${notTakingHtml}
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function viewProfile(teacherId) { alert(`Профиль репетитора ID ${teacherId}. Полная версия в разработке.`); }
-
-        // ОТКРЫТИЕ МОДАЛЬНОГО ОКНА ЗАПИСИ
+        // Открытие модального окна
         window.openBookingModal = function(teacherId) {
+            const teacher = tutorsData[teacherId];
+            if (!teacher) {
+                alert('Репетитор не найден');
+                return;
+            }
+            if (!teacher.accepting) {
+                alert('Этот репетитор временно не принимает новых учеников. Выберите другого.');
+                return;
+            }
             if (!currentUser) {
                 alert('Для записи на урок необходимо войти в систему.');
                 redirectToLogin();
                 return;
             }
-            const teacher = tutors.find(t => t.id === teacherId);
-            if (!teacher) { alert('Репетитор не найден'); return; }
-            if (!teacher.accepting_students) {
-                alert('Этот репетитор временно не принимает новых учеников. Выберите другого.');
-                return;
-            }
             const modal = document.getElementById('bookingModal');
-            if (!modal) return;
             document.getElementById('bookingTeacherName').innerText = `Запись на урок к ${teacher.name}`;
             document.getElementById('selectedTeacherId').value = teacherId;
             document.getElementById('bookingSubject').value = teacher.subjects.split(',')[0];
@@ -386,62 +518,46 @@
         };
 
         function closeBookingModal() {
-            const modal = document.getElementById('bookingModal');
-            if (modal) modal.style.display = 'none';
+            document.getElementById('bookingModal').style.display = 'none';
         }
 
-        function initBookingForm() {
-            const form = document.getElementById('bookingForm');
-            if (!form) return;
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                if (!currentUser) {
-                    alert('Необходимо войти в систему');
-                    redirectToLogin();
-                    return;
-                }
-                const teacherId = parseInt(document.getElementById('selectedTeacherId').value);
-                const teacher = tutors.find(t => t.id === teacherId);
-                if (!teacher || !teacher.accepting_students) {
-                    alert('Запись невозможна: репетитор не принимает учеников.');
-                    closeBookingModal();
-                    return;
-                }
-                const date = document.getElementById('bookingDate').value;
-                const time = document.getElementById('bookingTime').value;
-                if (!date || !time) {
-                    alert('Выберите дату и время урока');
-                    return;
-                }
-                const subject = document.getElementById('bookingSubject').value;
-                const notes = document.getElementById('bookingNotes').value;
-                alert(`✅ Урок забронирован!\nРепетитор: ${teacher.name}\nПредмет: ${subject}\nДата: ${date}\nВремя: ${time}\nПожелания: ${notes || 'нет'}`);
+        function viewProfile(teacherId) {
+            alert(`Профиль репетитора ID ${teacherId}. Полная версия в разработке.`);
+        }
+
+        // Обработка формы
+        document.getElementById('bookingForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const teacherId = parseInt(document.getElementById('selectedTeacherId').value);
+            const teacher = tutorsData[teacherId];
+            if (!teacher || !teacher.accepting) {
+                alert('Запись невозможна: репетитор не принимает учеников.');
                 closeBookingModal();
-                form.reset();
-            });
-        }
+                return;
+            }
+            const date = document.getElementById('bookingDate').value;
+            const time = document.getElementById('bookingTime').value;
+            if (!date || !time) {
+                alert('Выберите дату и время урока');
+                return;
+            }
+            const subject = document.getElementById('bookingSubject').value;
+            const notes = document.getElementById('bookingNotes').value;
+            alert(`✅ Урок забронирован!\nРепетитор: ${teacher.name}\nПредмет: ${subject}\nДата: ${date}\nВремя: ${time}\nПожелания: ${notes || 'нет'}`);
+            closeBookingModal();
+            this.reset();
+        });
 
-        function initModalCloseHandlers() {
-            const closeBtn = document.getElementById('closeModalBtn');
-            const cancelBtn = document.getElementById('cancelModalBtn');
-            if (closeBtn) closeBtn.onclick = closeBookingModal;
-            if (cancelBtn) cancelBtn.onclick = closeBookingModal;
-            window.onclick = function(event) {
-                if (event.target.classList && event.target.classList.contains('modal')) {
-                    event.target.style.display = 'none';
-                }
-            };
-        }
+        // Закрытие модального окна
+        document.getElementById('closeModalBtn')?.addEventListener('click', closeBookingModal);
+        document.getElementById('cancelModalBtn')?.addEventListener('click', closeBookingModal);
+        window.onclick = function(event) {
+            if (event.target.classList && event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
 
-        function init() {
-            initDemoTutors();
-            loadCurrentUser();
-            renderTeachers();
-            initBookingForm();
-            initModalCloseHandlers();
-        }
-
-        init();
+        loadCurrentUser();
     </script>
 </body>
 </html>
