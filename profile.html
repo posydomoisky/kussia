@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет ученика - УчебаВместе</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ----- СВЕТЛАЯ ТЕМА (без темной версии) ----- */
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --fg: #1e293b;
+            --muted-fg: #64748b;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #f59e0b;
+            --shadow: rgba(0, 0, 0, 0.05);
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Header */
+        header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo-link {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--fg);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-balance-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--bg);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .balance-amount {
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--fg);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Profile section */
+        .profile-section {
+            padding: 2rem 0;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .profile-info {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .profile-details h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .balance-display {
+            background: var(--bg);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        /* Stats grid */
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--success);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.7rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fade 0.2s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Balance card */
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .balance-card h2 {
+            font-size: 3rem;
+            margin: 0.5rem 0;
+        }
+
+        .btn-balance {
+            background: white;
+            color: #1e40af;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-balance-outline {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Tables & modals */
+        .operations-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .operations-table th, .operations-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .operation-positive { color: var(--success); font-weight: 600; }
+        .operation-negative { color: var(--danger); font-weight: 600; }
+        .operation-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+        }
+        .operation-add { background: #dcfce7; color: #15803d; }
+        .operation-subtract { background: #fee2e2; color: #b91c1c; }
+        .operation-bonus { background: #fef3c7; color: #92400e; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--card);
+            border-radius: 1rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-body { padding: 1.5rem; }
+        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 1rem; }
+        .modal-close { background: none; border: none; font-size: 1.8rem; cursor: pointer; }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-control, .custom-amount, select, textarea, input[type="text"], input[type="email"], input[type="tel"] {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--bg);
+        }
+        .amount-buttons {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .amount-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 0.6rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+        .amount-btn.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .lessons-grid, .tutors-grid, .reviews-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .lesson-card, .tutor-card, .review-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .status-scheduled { background: #dcfce7; color: #15803d; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.8rem; }
+        .rating-stars { color: #fbbf24; }
+        .schedule-calendar {
+            background: var(--card);
+            border-radius: 1rem;
+            padding: 1rem;
+        }
+        .week-days {
+            display: grid;
+            grid-template-columns: repeat(7,1fr);
+            gap: 0.5rem;
+            text-align: center;
+        }
+        .day-card {
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            min-height: 120px;
+        }
+        .lesson-item { font-size: 0.8rem; background: var(--bg); margin-top: 0.25rem; border-radius: 0.25rem; padding: 0.2rem; }
+    </style>
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="header-content">
+            <div class="logo"><a href="#" class="logo-link">УчебаВместе</a></div>
+            <nav><a href="#subjects" id="navSubjects">Предметы</a><a href="teacher.html" id="navTeachers">Репетиторы</a></nav>
+            <div class="header-actions" id="headerActions">
+                <div id="userAuthSection"></div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<section class="profile-section">
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-info">
+                <div class="profile-avatar" id="profileAvatar">ИИ</div>
+                <div class="profile-details">
+                    <h1 id="profileName">Иван Иванов</h1>
+                    <p id="profileRole">Ученик</p>
+                    <p id="profileEmail">student@example.com</p>
+                </div>
+            </div>
+            <div class="profile-actions">
+                <div class="balance-display"><span class="balance-label">Баланс:</span><span class="balance-value" id="headerBalance">5,000 ₽</span></div>
+                <button class="btn btn-primary" onclick="bookNewLesson()">📚 Записаться на урок</button>
+                <button class="btn btn-outline" onclick="editProfile()">✏️ Редактировать</button>
+            </div>
+        </div>
+
+        <!-- Balance Card -->
+        <div class="balance-card">
+            <h2 id="studentBalance">5,000 ₽</h2>
+            <p>Доступно для оплаты уроков</p>
+            <div class="balance-actions">
+                <button class="btn-balance" onclick="showAddMoneyModal()"><i class="fas fa-plus-circle"></i> Пополнить баланс</button>
+                <button class="btn-balance-outline" onclick="showUserOperations()"><i class="fas fa-history"></i> История операций</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="profile-stats">
+            <div class="stat-card"><h3 id="totalLessonsCount">0</h3><p>Всего уроков</p></div>
+            <div class="stat-card"><h3 id="upcomingLessonsCount">0</h3><p>Предстоящих</p></div>
+            <div class="stat-card"><h3 id="completedLessonsCount">0</h3><p>Завершено</p></div>
+            <div class="stat-card"><div class="balance-badge">Баланс</div><h3 id="totalBalance">5,000 ₽</h3><p>Доступно</p><button class="btn btn-outline btn-sm" onclick="manageUserBalance()" style="margin-top:8px;">Управление</button></div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('lessons')"><i class="fas fa-book-open"></i> Мои уроки</button>
+            <button class="tab" onclick="switchTab('balance')"><i class="fas fa-money-bill-wave"></i> Баланс и оплата</button>
+            <button class="tab" onclick="switchTab('tutors')"><i class="fas fa-users"></i> Мои репетиторы</button>
+            <button class="tab" onclick="switchTab('schedule')"><i class="fas fa-calendar-alt"></i> Расписание</button>
+            <button class="tab" onclick="switchTab('reviews')"><i class="fas fa-star"></i> Отзывы</button>
+        </div>
+
+        <!-- TAB: Уроки -->
+        <div class="tab-content active" id="lessonsTab"><div class="tab-header"><h2>Мои уроки</h2><select id="lessonFilter" onchange="filterLessons()"><option value="all">Все</option><option value="scheduled">Предстоящие</option><option value="completed">Завершённые</option><option value="cancelled">Отменённые</option></select></div><div id="lessonsList" class="lessons-grid"></div></div>
+
+        <!-- TAB: Баланс -->
+        <div class="tab-content" id="balanceTab"><div class="tab-header"><h2>Баланс и оплата</h2><button class="btn btn-primary" onclick="showAddMoneyModal()"><i class="fas fa-plus"></i> Пополнить</button></div><h3>История операций</h3><table class="operations-table"><thead><tr><th>Дата</th><th>Описание</th><th>Тип</th><th>Сумма</th><th>Остаток</th></tr></thead><tbody id="operationsTableBody"></tbody></table></div>
+
+        <!-- TAB: Репетиторы -->
+        <div class="tab-content" id="tutorsTab"><div class="tab-header"><h2>Мои репетиторы</h2><button class="btn btn-primary" onclick="findNewTutor()">Найти нового</button></div><div id="tutorsList" class="tutors-grid"></div></div>
+
+        <!-- TAB: Расписание -->
+        <div class="tab-content" id="scheduleTab"><div class="tab-header"><h2>Расписание</h2><div><button class="btn-outline btn-sm" onclick="prevWeek()">← Пред.</button><span id="currentWeekLabel" style="margin:0 1rem;"></span><button class="btn-outline btn-sm" onclick="nextWeek()">След. →</button></div></div><div id="scheduleCalendar" class="schedule-calendar"></div></div>
+
+        <!-- TAB: Отзывы -->
+        <div class="tab-content" id="reviewsTab"><div class="tab-header"><h2>Мои отзывы</h2><button class="btn btn-primary" onclick="writeNewReview()">Написать отзыв</button></div><div id="reviewsList" class="reviews-grid"></div></div>
+    </div>
+</section>
+
+<!-- Модалки -->
+<div id="addMoneyModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Пополнение баланса</h2><button class="modal-close" onclick="closeModal('addMoneyModal')">×</button></div><div class="modal-body"><p>Текущий баланс: <strong id="currentBalanceDisplay">0 ₽</strong></p><div class="amount-buttons"><button class="amount-btn" onclick="selectAmount(500)">500 ₽</button><button class="amount-btn" onclick="selectAmount(1000)">1,000 ₽</button><button class="amount-btn" onclick="selectAmount(2000)">2,000 ₽</button><button class="amount-btn" onclick="selectAmount(3000)">3,000 ₽</button><button class="amount-btn selected" onclick="selectAmount(5000)">5,000 ₽</button><button class="amount-btn" onclick="selectAmount(10000)">10,000 ₽</button></div><input type="number" id="customAmount" class="custom-amount" placeholder="Другая сумма" oninput="selectCustomAmount()"><div style="margin-top:1rem;"><strong>Сумма:</strong> <span id="totalAmount">5,000 ₽</span><br><strong>Новый баланс:</strong> <span id="newBalanceDisplay">10,000 ₽</span></div><p class="note">⚠️ Демо-режим</p></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('addMoneyModal')">Отмена</button><button class="btn btn-primary" onclick="processDemoPayment()">Пополнить</button></div></div></div>
+
+<div id="balanceModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Управление балансом</h2><button class="modal-close" onclick="closeModal('balanceModal')">×</button></div><div class="modal-body"><p><strong>Пользователь:</strong> <span id="balanceUserName"></span></p><p><strong>Текущий баланс:</strong> <span id="currentUserBalance"></span></p><select id="operationType" class="form-control"><option value="add">Пополнение</option><option value="subtract">Списание</option><option value="bonus">Бонус</option></select><input type="number" id="amountOp" class="form-control" placeholder="Сумма" value="1000"><textarea id="commentOp" class="form-control" placeholder="Комментарий"></textarea></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('balanceModal')">Отмена</button><button class="btn btn-primary" onclick="processBalanceOperation()">Выполнить</button></div></div></div>
+
+<div id="operationsModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>История операций</h2><button class="modal-close" onclick="closeModal('operationsModal')">×</button></div><div class="modal-body" id="operationsModalContent"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('operationsModal')">Закрыть</button></div></div></div>
+
+<div id="editProfileModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Редактирование профиля</h2><button class="modal-close" onclick="closeModal('editProfileModal')">×</button></div><div class="modal-body"><input type="text" id="editFirstName" placeholder="Имя"><input type="text" id="editLastName" placeholder="Фамилия"><input type="email" id="editEmail" placeholder="Email"><input type="tel" id="editPhone" placeholder="Телефон"><input type="text" id="editGrade" placeholder="Класс/курс"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('editProfileModal')">Отмена</button><button class="btn btn-primary" onclick="saveProfileChanges()">Сохранить</button></div></div></div>
+
+<div id="bookLessonModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Запись на урок</h2><button class="modal-close" onclick="closeModal('bookLessonModal')">×</button></div><div class="modal-body"><select id="lessonSubject"><option value="Математика">Математика</option><option value="Русский язык">Русский язык</option><option value="Физика">Физика</option></select><select id="lessonTutorId"></select><input type="datetime-local" id="lessonDateTime"><input type="number" id="lessonDuration" value="60" placeholder="Длительность (мин)"><p>Стоимость: <span id="lessonPrice">0</span> ₽</p></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('bookLessonModal')">Отмена</button><button class="btn btn-primary" onclick="confirmBooking()">Записаться</button></div></div></div>
+
+<div id="reviewModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Оставить отзыв</h2><button class="modal-close" onclick="closeModal('reviewModal')">×</button></div><div class="modal-body"><select id="reviewLessonSelect"></select><div class="rating-stars" id="starRating"><span data-val="1">★</span><span data-val="2">★</span><span data-val="3">★</span><span data-val="4">★</span><span data-val="5">★</span></div><textarea id="reviewTextArea" placeholder="Ваш отзыв"></textarea></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('reviewModal')">Отмена</button><button class="btn btn-primary" onclick="submitReview()">Отправить</button></div></div></div>
+
+<script>
+    // ---------------------- ДЕМО ДАННЫЕ И ГЛОБАЛЬНЫЕ ОБЪЕКТЫ ----------------------
+    let currentUser = null;
+    let lessons = [];
+    let tutors = [];
+    let reviews = [];
+    let weekOffset = 0;
+    let selectedAmount = 5000;
+
+    // Balance Manager
+    const balanceManager = {
+        usersBalance: new Map(),
+        operations: [],
+        initDemoData() {
+            if(!localStorage.getItem('balanceData')) {
+                this.usersBalance.set(3, 5000);
+                this.operations = [
+                    { userId:3, date:new Date(2024,11,15), type:'add', amount:5000, newBalance:5000, comment:'Пополнение через карту' },
+                    { userId:3, date:new Date(2024,11,10), type:'subtract', amount:-1500, newBalance:3500, comment:'Оплата урока математики' },
+                    { userId:3, date:new Date(2024,11,5), type:'bonus', amount:500, newBalance:5000, comment:'Приветственный бонус' }
+                ];
+                this.saveToLocal();
+            } else {
+                this.loadFromLocal();
+            }
+        },
+        saveToLocal() {
+            localStorage.setItem('balanceData', JSON.stringify({ balances: Object.fromEntries(this.usersBalance), ops: this.operations }));
+        },
+        loadFromLocal() {
+            const data = JSON.parse(localStorage.getItem('balanceData'));
+            if(data) {
+                this.usersBalance = new Map(Object.entries(data.balances).map(([k,v])=>[parseInt(k),v]));
+                this.operations = data.ops;
+            }
+        },
+        getUserBalance(userId) { return this.usersBalance.get(userId) || 0; },
+        updateUserBalance(userId, amount, type, comment) {
+            let current = this.getUserBalance(userId);
+            let newBal = current;
+            let opAmount = amount;
+            if(type === 'add' || type === 'bonus') { newBal += amount; opAmount = amount; }
+            else if(type === 'subtract') { newBal -= amount; opAmount = -amount; }
+            if(newBal < 0) return { success: false };
+            this.usersBalance.set(userId, newBal);
+            const operation = { userId, date: new Date(), type, amount: opAmount, newBalance: newBal, comment };
+            this.operations.unshift(operation);
+            this.saveToLocal();
+            return { success: true, newBalance: newBal };
+        },
+        getUserOperations(userId) { return this.operations.filter(op => op.userId === userId); },
+        getOperationTypeText(type) {
+            if(type==='add') return 'Пополнение';
+            if(type==='subtract') return 'Списание';
+            if(type==='bonus') return 'Бонус';
+            return type;
+        }
+    };
+
+    // Демо данные уроков и репетиторов
+    function initDemoData() {
+        tutors = [
+            { id:1, name:'Анна Петрова', subject:'Математика', pricePerHour:1500, rating:4.8 },
+            { id:2, name:'Дмитрий Соколов', subject:'Русский язык', pricePerHour:1300, rating:4.9 },
+            { id:3, name:'Елена Морозова', subject:'Физика', pricePerHour:1600, rating:4.7 }
+        ];
+        lessons = [
+            { id:101, userId:3, tutorId:1, subject:'Математика', date: new Date(2025,3,15,14,0), duration:60, status:'scheduled', price:1500, reviewGiven:false },
+            { id:102, userId:3, tutorId:2, subject:'Русский язык', date: new Date(2025,3,10,12,0), duration:60, status:'completed', price:1300, reviewGiven:true },
+            { id:103, userId:3, tutorId:3, subject:'Физика', date: new Date(2025,3,20,16,0), duration:90, status:'scheduled', price:2400, reviewGiven:false }
+        ];
+        reviews = [
+            { id:1, userId:3, lessonId:102, tutorId:2, rating:5, text:'Отличный репетитор, всё понятно!', date: new Date(2025,3,12) }
+        ];
+    }
+
+    function updateStatsAndUI() {
+        const userLessons = lessons.filter(l => l.userId === currentUser?.id);
+        const total = userLessons.length;
+        const upcoming = userLessons.filter(l => l.status === 'scheduled' && new Date(l.date) > new Date()).length;
+        const completed = userLessons.filter(l => l.status === 'completed').length;
+        document.getElementById('totalLessonsCount').innerText = total;
+        document.getElementById('upcomingLessonsCount').innerText = upcoming;
+        document.getElementById('completedLessonsCount').innerText = completed;
+        const balance = balanceManager.getUserBalance(currentUser.id);
+        document.querySelectorAll('#studentBalance, #totalBalance, #headerBalance, .balance-value').forEach(el => el && (el.innerText = balance.toLocaleString() + ' ₽'));
+        renderLessons();
+        renderTutors();
+        renderReviews();
+        renderSchedule();
+        updateOperationsTable();
+    }
+
+    function renderLessons() {
+        const filter = document.getElementById('lessonFilter')?.value || 'all';
+        let filtered = lessons.filter(l => l.userId === currentUser.id);
+        if(filter !== 'all') filtered = filtered.filter(l => l.status === filter);
+        const container = document.getElementById('lessonsList');
+        if(!container) return;
+        if(filtered.length === 0) { container.innerHTML = '<div class="empty-state">Нет уроков</div>'; return; }
+        container.innerHTML = filtered.map(l => {
+            const tutor = tutors.find(t => t.id === l.tutorId);
+            const dateStr = new Date(l.date).toLocaleString();
+            let statusClass = '';
+            if(l.status === 'scheduled') statusClass = 'status-scheduled';
+            else if(l.status === 'completed') statusClass = 'status-completed';
+            else statusClass = 'status-cancelled';
+            return `<div class="lesson-card"><div><strong>${l.subject}</strong> с ${tutor?.name}<br><small>${dateStr}, ${l.duration} мин</small><br><span class="${statusClass}">${l.status==='scheduled'?'Предстоит':l.status==='completed'?'Завершён':'Отменён'}</span></div><div><b>${l.price} ₽</b><br>${l.status === 'scheduled' ? `<button class="btn btn-outline btn-sm" onclick="cancelLesson(${l.id})">Отменить</button>` : (l.status === 'completed' && !l.reviewGiven ? `<button class="btn btn-primary btn-sm" onclick="openReviewForLesson(${l.id})">Отзыв</button>` : '')}</div></div>`;
+        }).join('');
+    }
+
+    function renderTutors() {
+        const myTutorIds = [...new Set(lessons.filter(l => l.userId === currentUser.id).map(l => l.tutorId))];
+        const myTutors = tutors.filter(t => myTutorIds.includes(t.id));
+        const container = document.getElementById('tutorsList');
+        if(!container) return;
+        if(myTutors.length === 0) { container.innerHTML = '<div class="empty-state">Нет репетиторов</div>'; return; }
+        container.innerHTML = myTutors.map(t => `<div class="tutor-card"><div><strong>${t.name}</strong><br>${t.subject}<br>⭐ ${t.rating}</div><div><button class="btn btn-primary btn-sm" onclick="bookWithTutor(${t.id})">Записаться</button></div></div>`).join('');
+    }
+
+    function renderReviews() {
+        const myReviews = reviews.filter(r => r.userId === currentUser.id);
+        const container = document.getElementById('reviewsList');
+        if(!container) return;
+        if(myReviews.length === 0) { container.innerHTML = '<div class="empty-state">Вы ещё не оставляли отзывы</div>'; return; }
+        container.innerHTML = myReviews.map(r => `<div class="review-card"><div><strong>Репетитор:</strong> ${tutors.find(t=>t.id===r.tutorId)?.name}<br>⭐ ${r.rating}/5<br>${new Date(r.date).toLocaleDateString()}<p>${r.text}</p></div></div>`).join('');
+    }
+
+    function renderSchedule() {
+        const startOfWeek = new Date();
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1 + weekOffset*7);
+        const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+        let html = `<div class="week-days">`;
+        for(let i=0;i<7;i++) {
+            const dayDate = new Date(startOfWeek);
+            dayDate.setDate(startOfWeek.getDate()+i);
+            const dayStr = dayDate.toLocaleDateString();
+            const dayLessons = lessons.filter(l => l.userId === currentUser.id && new Date(l.date).toDateString() === dayDate.toDateString());
+            html += `<div class="day-card"><strong>${days[i]}</strong><br><small>${dayStr}</small>${dayLessons.map(l => `<div class="lesson-item">${l.subject} ${l.duration}мин</div>`).join('')}</div>`;
+        }
+        html += `</div>`;
+        document.getElementById('scheduleCalendar').innerHTML = html;
+        document.getElementById('currentWeekLabel').innerText = `${startOfWeek.toLocaleDateString()} — ${new Date(startOfWeek.getTime()+6*86400000).toLocaleDateString()}`;
+    }
+
+    function updateOperationsTable() {
+        const ops = balanceManager.getUserOperations(currentUser.id);
+        const tbody = document.getElementById('operationsTableBody');
+        if(!tbody) return;
+        tbody.innerHTML = ops.map(op => `<tr><td>${new Date(op.date).toLocaleDateString()}</td><td>${op.comment || ''}</td><td><span class="operation-type operation-${op.type}">${balanceManager.getOperationTypeText(op.type)}</span></td><td class="${op.amount>0?'operation-positive':'operation-negative'}">${op.amount>0?'+':''}${op.amount} ₽</td><td>${op.newBalance} ₽</td></tr>`).join('');
+    }
+
+    // ----- ФУНКЦИИ ВЗАИМОДЕЙСТВИЯ -----
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        document.getElementById(tab+'Tab').classList.add('active');
+        document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+    }
+
+    function showAddMoneyModal() {
+        const balance = balanceManager.getUserBalance(currentUser.id);
+        document.getElementById('currentBalanceDisplay').innerText = balance.toLocaleString() + ' ₽';
+        document.getElementById('totalAmount').innerText = selectedAmount + ' ₽';
+        document.getElementById('newBalanceDisplay').innerText = (balance+selectedAmount).toLocaleString() + ' ₽';
+        openModal('addMoneyModal');
+    }
+
+    function selectAmount(amt) { selectedAmount = amt; document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('selected')); event.target.classList.add('selected'); document.getElementById('totalAmount').innerText = amt+' ₽'; const bal = balanceManager.getUserBalance(currentUser.id); document.getElementById('newBalanceDisplay').innerText = (bal+amt).toLocaleString()+' ₽'; }
+    function selectCustomAmount() { let val = parseInt(document.getElementById('customAmount').value); if(val>=100) { selectedAmount=val; document.getElementById('totalAmount').innerText=val+' ₽'; const bal=balanceManager.getUserBalance(currentUser.id); document.getElementById('newBalanceDisplay').innerText=(bal+val).toLocaleString()+' ₽'; } }
+    function processDemoPayment() { const res = balanceManager.updateUserBalance(currentUser.id, selectedAmount, 'add', `Пополнение на ${selectedAmount}₽`); if(res.success) { alert(`Баланс пополнен! Новый баланс: ${res.newBalance} ₽`); closeModal('addMoneyModal'); updateStatsAndUI(); } else alert('Ошибка'); }
+
+    function manageUserBalance() { document.getElementById('balanceUserName').innerText = currentUser.name; document.getElementById('currentUserBalance').innerText = balanceManager.getUserBalance(currentUser.id)+' ₽'; openModal('balanceModal'); }
+    function processBalanceOperation() { let type = document.getElementById('operationType').value; let amount = parseInt(document.getElementById('amountOp').value); let comment = document.getElementById('commentOp').value; if(!amount || amount<=0) return alert('Введите сумму'); const res = balanceManager.updateUserBalance(currentUser.id, amount, type, comment); if(res.success) { alert(`Операция выполнена, баланс: ${res.newBalance} ₽`); closeModal('balanceModal'); updateStatsAndUI(); } else alert('Недостаточно средств'); }
+    function showUserOperations() { const ops = balanceManager.getUserOperations(currentUser.id); const content = document.getElementById('operationsModalContent'); if(ops.length===0) content.innerHTML='<p>Нет операций</p>'; else content.innerHTML=`<table class="operations-table"><tr><th>Дата</th><th>Тип</th><th>Сумма</th><th>Комментарий</th></tr>${ops.map(op=>`<tr><td>${new Date(op.date).toLocaleDateString()}</td><td>${balanceManager.getOperationTypeText(op.type)}</td><td>${op.amount>0?'+':''}${op.amount} ₽</td><td>${op.comment||''}</td></tr>`).join('')}</table>`; openModal('operationsModal'); }
+
+    function editProfile() { document.getElementById('editFirstName').value = currentUser.name.split(' ')[0]||''; document.getElementById('editLastName').value = currentUser.name.split(' ')[1]||''; document.getElementById('editEmail').value = currentUser.email; document.getElementById('editPhone').value = currentUser.phone||''; document.getElementById('editGrade').value = currentUser.grade||''; openModal('editProfileModal'); }
+    function saveProfileChanges() { currentUser.name = `${document.getElementById('editFirstName').value} ${document.getElementById('editLastName').value}`; currentUser.email = document.getElementById('editEmail').value; currentUser.phone = document.getElementById('editPhone').value; currentUser.grade = document.getElementById('editGrade').value; localStorage.setItem('ucheba_current_user', JSON.stringify(currentUser)); document.getElementById('profileName').innerText = currentUser.name; document.getElementById('profileEmail').innerText = currentUser.email; document.getElementById('profileAvatar').innerText = currentUser.name.charAt(0); closeModal('editProfileModal'); alert('Профиль обновлён'); }
+
+    function bookNewLesson() { renderTutorSelect(); openModal('bookLessonModal'); }
+    function bookWithTutor(tutorId) { renderTutorSelect(tutorId); openModal('bookLessonModal'); }
+    function renderTutorSelect(selectedId=null) { const sel = document.getElementById('lessonTutorId'); sel.innerHTML = tutors.map(t => `<option value="${t.id}" ${selectedId==t.id?'selected':''}>${t.name} (${t.subject}) — ${t.pricePerHour}₽/ч</option>`).join(''); updateLessonPrice(); }
+    function updateLessonPrice() { const tutorId = parseInt(document.getElementById('lessonTutorId').value); const tutor = tutors.find(t=>t.id===tutorId); const duration = parseInt(document.getElementById('lessonDuration').value)||60; const price = tutor ? (tutor.pricePerHour * duration/60) : 0; document.getElementById('lessonPrice').innerText = price; }
+    function confirmBooking() { const tutorId = parseInt(document.getElementById('lessonTutorId').value); const subject = document.getElementById('lessonSubject').value; const dateTime = new Date(document.getElementById('lessonDateTime').value); const duration = parseInt(document.getElementById('lessonDuration').value); if(!dateTime || dateTime <= new Date()) return alert('Выберите корректное время'); const tutor = tutors.find(t=>t.id===tutorId); const price = tutor.pricePerHour * duration/60; const balance = balanceManager.getUserBalance(currentUser.id); if(balance < price) return alert('Недостаточно средств на балансе'); const newLesson = { id: Date.now(), userId: currentUser.id, tutorId, subject, date: dateTime, duration, status:'scheduled', price, reviewGiven:false }; lessons.push(newLesson); balanceManager.updateUserBalance(currentUser.id, price, 'subtract', `Оплата урока ${subject}`); updateStatsAndUI(); closeModal('bookLessonModal'); alert('Урок успешно запланирован!'); }
+    function cancelLesson(lessonId) { const lesson = lessons.find(l=>l.id===lessonId); if(lesson && confirm('Отменить урок?')) { lesson.status = 'cancelled'; balanceManager.updateUserBalance(currentUser.id, lesson.price, 'add', `Возврат за отмену урока ${lesson.subject}`); updateStatsAndUI(); } }
+    function openReviewForLesson(lessonId) { const select = document.getElementById('reviewLessonSelect'); select.innerHTML = `<option value="${lessonId}">Урок ${lessons.find(l=>l.id===lessonId)?.subject}</option>`; openModal('reviewModal'); window.currentReviewLessonId = lessonId; }
+    function submitReview() { const lessonId = window.currentReviewLessonId; const rating = parseInt(document.querySelector('#starRating span.active')?.getAttribute('data-val')||5); const text = document.getElementById('reviewTextArea').value; const lesson = lessons.find(l=>l.id===lessonId); if(lesson) { reviews.push({ id:Date.now(), userId:currentUser.id, lessonId, tutorId:lesson.tutorId, rating, text, date:new Date() }); lesson.reviewGiven = true; alert('Спасибо за отзыв!'); closeModal('reviewModal'); renderReviews(); } }
+    function findNewTutor() { alert('Перейти на страницу поиска репетиторов'); }
+    function prevWeek() { weekOffset--; renderSchedule(); }
+    function nextWeek() { weekOffset++; renderSchedule(); }
+    function writeNewReview() { const completedLessons = lessons.filter(l=>l.userId===currentUser.id && l.status==='completed' && !l.reviewGiven); if(completedLessons.length===0) { alert('Нет завершённых уроков для отзыва'); return; } const select = document.getElementById('reviewLessonSelect'); select.innerHTML = completedLessons.map(l=>`<option value="${l.id}">${l.subject} (${new Date(l.date).toLocaleDateString()})</option>`).join(''); openModal('reviewModal'); window.currentReviewLessonId = completedLessons[0].id; }
+
+    function filterLessons() { renderLessons(); }
+    function refreshLessons() { renderLessons(); }
+
+    // modal helpers
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    window.onclick = function(e) { if(e.target.classList.contains('modal')) e.target.style.display='none'; };
+
+    // star rating init
+    function initStarRating() { const stars = document.querySelectorAll('#starRating span'); stars.forEach(star => { star.addEventListener('click', function() { stars.forEach(s=>s.classList.remove('active')); this.classList.add('active'); }); star.setAttribute('data-val', star.getAttribute('data-val')||star.innerText); }); if(stars.length) stars[4].classList.add('active'); }
+
+    // Авторизация / шапка
+    function updateHeaderAuth() {
+        const section = document.getElementById('userAuthSection');
+        if(currentUser) {
+            section.innerHTML = `<div class="user-balance-header"><span class="balance-amount" id="headerBalanceDynamic">${balanceManager.getUserBalance(currentUser.id).toLocaleString()} ₽</span><button class="btn btn-outline btn-sm" onclick="manageUserBalance()"><i class="fas fa-wallet"></i></button><button class="btn btn-outline btn-sm" onclick="logout()">Выйти</button></div>`;
+        } else {
+            section.innerHTML = `<button class="btn btn-primary" onclick="loginDemo()">Войти</button>`;
+        }
+    }
+
+    function loginDemo() {
+        const demoUser = { id:3, name:'Иван Иванов', email:'ivan@example.com', role:'student', phone:'+7 999 123-45-67', grade:'11 класс' };
+        localStorage.setItem('ucheba_current_user', JSON.stringify(demoUser));
+        currentUser = demoUser;
+        updateHeaderAuth();
+        updateStatsAndUI();
+        document.getElementById('profileName').innerText = currentUser.name;
+        document.getElementById('profileEmail').innerText = currentUser.email;
+        document.getElementById('profileAvatar').innerText = currentUser.name.charAt(0);
+    }
+
+    function logout() { localStorage.removeItem('ucheba_current_user'); currentUser = null; updateHeaderAuth(); location.reload(); }
+
+    // Загрузка страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        balanceManager.initDemoData();
+        initDemoData();
+        const stored = localStorage.getItem('ucheba_current_user');
+        if(stored) { currentUser = JSON.parse(stored); } else { loginDemo(); }
+        if(currentUser) updateHeaderAuth();
+        updateStatsAndUI();
+        initStarRating();
+        document.getElementById('lessonDuration')?.addEventListener('input', updateLessonPrice);
+        document.getElementById('lessonTutorId')?.addEventListener('change', updateLessonPrice);
+    });
+</script>
+</body>
+</html>
