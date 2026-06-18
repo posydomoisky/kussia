@@ -1,4 +1,4 @@
-// VK Publisher - исправленная версия
+// VK Publisher - ИСПРАВЛЕННАЯ версия с принудительным отображением
 
 // ========== КОНФИГУРАЦИЯ ==========
 const VK_ACCESS_TOKEN = 'vk1.a.Dx2Q9eBUtyAznTAfQ_NaZP48G_WO0QtpV390AVQ4jvH4evJNUtOL9V2MrZ6ssAmm_DxDkGB3UzJKdYlKsT1ntAUHtvUYL6ItJMk9dB8bg7OZTqhFrDZesWNe35Z62TFvaCUCLbCenYivke-rgetpAH0RkNGkRqfVTyFQHGWceabFUA5eQh_3Ywm6hif80sXhm4rJSUAcqyknYLSfB3wwBg';
@@ -7,42 +7,82 @@ const VK_GROUP_ID = '233570764';
 
 let postAttachments = [];
 
-// ========== ОТКРЫТИЕ / ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА ==========
+// ========== ОТКРЫТИЕ МОДАЛЬНОГО ОКНА (ФОРСИРОВАННОЕ) ==========
 function openVKPublishModal() {
+    console.log('🔵 openVKPublishModal вызвана');
+    
     const modal = document.getElementById('vkPublishModal');
-    if (modal) {
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-    } else {
-        console.error('Модальное окно не найдено!');
-        alert('Ошибка: модальное окно не найдено на странице');
+    if (!modal) {
+        console.error('❌ Модальное окно не найдено!');
+        alert('Ошибка: модальное окно не найдено');
+        return;
     }
+    
+    console.log('✅ Модальное окно найдено, открываем...');
+    
+    // ПРИНУДИТЕЛЬНОЕ ОТОБРАЖЕНИЕ - переопределяем все стили
+    modal.style.display = 'block';
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    modal.style.zIndex = '99999';
+    modal.style.overflow = 'auto';
+    modal.style.padding = '20px';
+    modal.style.boxSizing = 'border-box';
+    
+    // Принудительно показываем контент модального окна
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.style.display = 'block';
+        modalContent.style.position = 'relative';
+        modalContent.style.margin = '50px auto';
+        modalContent.style.maxWidth = '700px';
+        modalContent.style.backgroundColor = '#ffffff';
+        modalContent.style.borderRadius = '16px';
+        modalContent.style.boxShadow = '0 20px 60px rgba(0,0,0,0.3)';
+        modalContent.style.padding = '0';
+        modalContent.style.animation = 'slideDown 0.3s ease';
+    }
+    
+    // Блокируем скролл страницы
+    document.body.style.overflow = 'hidden';
+    
+    console.log('✅ Модальное окно открыто');
 }
 
+// ========== ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА ==========
 function closeVKPublishModal() {
+    console.log('🔴 closeVKPublishModal вызвана');
+    
     const modal = document.getElementById('vkPublishModal');
     if (modal) {
         modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
     }
+    
+    document.body.style.overflow = 'auto';
 }
-
-// Закрытие по клику на фон
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('vkPublishModal');
-    if (modal) {
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeVKPublishModal();
-            }
-        });
-    }
-});
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
 function initVKPublisher() {
+    console.log('🚀 Инициализация VK Publisher...');
+    
+    // Принудительно скрываем модальное окно при загрузке
+    const modal = document.getElementById('vkPublishModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+    }
+    
     setupVKPublisherUI();
-    console.log('VK Publisher инициализирован');
+    console.log('✅ VK Publisher инициализирован');
 }
 
 // ========== НАСТРОЙКА UI ==========
@@ -78,13 +118,22 @@ function setupVKPublisherUI() {
             handleDroppedFiles(e.dataTransfer.files);
         });
     }
+    
+    // Закрытие по клику на фон (через event listener)
+    const modal = document.getElementById('vkPublishModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVKPublishModal();
+            }
+        });
+    }
 }
 
 // ========== ЗАГРУЗКА ИЗОБРАЖЕНИЙ ==========
 function handleImageUpload(e) {
     const files = e.target.files;
     handleDroppedFiles(files);
-    // Сбрасываем input, чтобы можно было загрузить те же файлы снова
     e.target.value = '';
 }
 
@@ -193,7 +242,6 @@ async function publishToVK() {
         return;
     }
     
-    // Отключаем кнопку на время публикации
     const publishBtn = document.querySelector('.vk-actions .btn-primary');
     if (publishBtn) {
         publishBtn.disabled = true;
@@ -203,7 +251,6 @@ async function publishToVK() {
     showNotification('Начинаю публикацию в VK...', 'info');
     
     try {
-        // Подготовка параметров
         const params = new URLSearchParams({
             owner_id: `-${VK_GROUP_ID}`,
             message: postText,
@@ -212,14 +259,11 @@ async function publishToVK() {
             v: VK_API_VERSION
         });
         
-        // Добавляем изображения (если есть)
         if (postAttachments.length > 0) {
-            // Сначала загружаем изображения на сервер VK
             const attachments = [];
             
             for (const img of postAttachments) {
                 try {
-                    // Загружаем изображение
                     const uploadUrl = await getUploadServer();
                     if (uploadUrl) {
                         const photoData = await uploadPhoto(uploadUrl, img.file);
@@ -239,7 +283,6 @@ async function publishToVK() {
         
         console.log('Параметры запроса:', params.toString());
         
-        // Отправляем запрос к VK API
         const response = await fetch('https://api.vk.com/method/wall.post', {
             method: 'POST',
             headers: {
@@ -281,7 +324,6 @@ async function publishToVK() {
                 clearVKForm();
                 closeVKPublishModal();
                 
-                // Обновляем новости на странице
                 if (typeof loadVKNews === 'function') {
                     loadVKNews();
                 }
@@ -300,7 +342,6 @@ async function publishToVK() {
         saveNewsLocally(postText);
     }
     
-    // Восстанавливаем кнопку
     if (publishBtn) {
         publishBtn.disabled = false;
         publishBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Опубликовать в VK';
@@ -341,7 +382,6 @@ async function uploadPhoto(uploadUrl, file) {
         console.log('Результат загрузки фото:', data);
         
         if (data.server && data.photo && data.hash) {
-            // Сохраняем фото на сервере VK
             const saveResponse = await fetch(
                 `https://api.vk.com/method/photos.saveWallPhoto?group_id=${VK_GROUP_ID}&server=${data.server}&photo=${encodeURIComponent(data.photo)}&hash=${data.hash}&access_token=${VK_ACCESS_TOKEN}&v=${VK_API_VERSION}`,
                 { method: 'POST' }
@@ -394,7 +434,7 @@ function showNotification(message, type = 'info') {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            z-index: 10000;
+            z-index: 100000;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -449,7 +489,7 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-// ========== СТИЛИ ==========
+// ========== СТИЛИ (встроенные с !important) ==========
 const vkStyles = `
     @keyframes slideIn {
         from { transform: translateX(100%); opacity: 0; }
@@ -459,65 +499,72 @@ const vkStyles = `
         from { transform: translateX(0); opacity: 1; }
         to { transform: translateX(100%); opacity: 0; }
     }
-    
-    /* Стили для модального окна */
-    .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: 9999;
-        overflow-y: auto;
-    }
-    
-    .modal-content {
-        background: white;
-        margin: 50px auto;
-        max-width: 700px;
-        border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        animation: slideDown 0.3s ease;
-        position: relative;
-    }
-    
     @keyframes slideDown {
         from { transform: translateY(-50px); opacity: 0; }
         to { transform: translateY(0); opacity: 1; }
     }
     
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px 25px;
-        border-bottom: 1px solid #e2e8f0;
+    /* Модальное окно - принудительные стили */
+    #vkPublishModal {
+        display: none !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+        z-index: 99999 !important;
+        overflow: auto !important;
+        padding: 20px !important;
+        box-sizing: border-box !important;
     }
     
-    .modal-header h2 {
-        margin: 0;
-        font-size: 20px;
-        color: #1e293b;
+    #vkPublishModal.active {
+        display: block !important;
     }
     
-    .modal-close {
-        background: none;
-        border: none;
-        font-size: 28px;
-        cursor: pointer;
-        color: #94a3b8;
-        transition: color 0.3s;
-        padding: 0 5px;
+    #vkPublishModal .modal-content {
+        position: relative !important;
+        margin: 50px auto !important;
+        max-width: 700px !important;
+        background: #ffffff !important;
+        border-radius: 16px !important;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3) !important;
+        padding: 0 !important;
+        animation: slideDown 0.3s ease !important;
     }
     
-    .modal-close:hover {
-        color: #ef4444;
+    #vkPublishModal .modal-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 20px 25px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
     }
     
-    .modal-body {
-        padding: 25px;
+    #vkPublishModal .modal-header h2 {
+        margin: 0 !important;
+        font-size: 20px !important;
+        color: #1e293b !important;
+    }
+    
+    #vkPublishModal .modal-close {
+        background: none !important;
+        border: none !important;
+        font-size: 28px !important;
+        cursor: pointer !important;
+        color: #94a3b8 !important;
+        transition: color 0.3s !important;
+        padding: 0 5px !important;
+        line-height: 1 !important;
+    }
+    
+    #vkPublishModal .modal-close:hover {
+        color: #ef4444 !important;
+    }
+    
+    #vkPublishModal .modal-body {
+        padding: 25px !important;
     }
     
     .vk-publisher-container {
@@ -709,11 +756,33 @@ const vkStyles = `
         styleSheet.id = 'vkPublisherStyles';
         styleSheet.textContent = vkStyles;
         document.head.appendChild(styleSheet);
+        console.log('✅ Стили VK Publisher добавлены');
     }
 })();
 
 // Инициализируем при загрузке DOM
 document.addEventListener('DOMContentLoaded', function() {
     initVKPublisher();
-    console.log('✅ VK Publisher готов к работе!');
+    
+    // Тестовое открытие через 2 секунды (для отладки)
+    console.log('✅ VK Publisher готов! Используйте кнопку "Опубликовать новость в VK"');
+    
+    // Добавляем обработчик на кнопку вручную (на случай, если onclick не сработал)
+    const adminBtn = document.getElementById('adminPublishBtn');
+    if (adminBtn) {
+        console.log('✅ Кнопка публикации найдена');
+        // Убеждаемся, что обработчик есть
+        if (!adminBtn._listenerAdded) {
+            adminBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                openVKPublishModal();
+            });
+            adminBtn._listenerAdded = true;
+            console.log('✅ Обработчик клика добавлен на кнопку');
+        }
+    } else {
+        console.warn('⚠️ Кнопка публикации не найдена на странице');
+    }
 });
+
+console.log('📦 VK Publisher скрипт загружен');
