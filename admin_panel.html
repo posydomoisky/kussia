@@ -1,644 +1,644 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Панель администратора - УчебаВместе</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Библиотеки для экспорта Excel и PDF -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        /* Глобальные переменные (светлая тема по умолчанию) */
-        :root {
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --border: #e2e8f0;
-            --fg: #1e293b;
-            --muted-fg: #64748b;
-            --primary: #3b82f6;
-            --secondary: #10b981;
-            --shadow: rgba(0,0,0,0.05);
+<script>
+    // ========================================================
+    // 1. ТЕСТОВЫЕ (ДЕМО) ПОЛЬЗОВАТЕЛИ
+    // ========================================================
+    const testUsers = [
+        {
+            id: 1,
+            firstName: 'Админ',
+            lastName: 'Админов',
+            login: 'admin',
+            password: 'admin123',
+            user_type: 'admin',
+            email: 'admin@ucheba-vmeste.ru',
+            phone: '+7 (999) 000-00-01'
+        },
+        {
+            id: 2,
+            firstName: 'Анна',
+            lastName: 'Петрова',
+            login: 'anna',
+            password: 'anna123',
+            user_type: 'tutor',
+            email: 'anna@ucheba-vmeste.ru',
+            phone: '+7 (999) 123-45-67',
+            subjects: ['Математика', 'Физика']
+        },
+        {
+            id: 3,
+            firstName: 'Иван',
+            lastName: 'Иванов',
+            login: 'student',
+            password: 'student123',
+            user_type: 'student',
+            email: 'student@example.com',
+            phone: '+7 (999) 123-45-73'
         }
-        body.dark {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --border: #334155;
-            --fg: #f1f5f9;
-            --muted-fg: #94a3b8;
-            --primary: #60a5fa;
-            --secondary: #34d399;
-            --shadow: rgba(0,0,0,0.3);
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            transition: background 0.2s, color 0.2s;
-        }
-        body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--fg);
-            line-height: 1.5;
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-        }
-        /* Header */
-        header {
-            background: var(--card);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        .logo a {
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-decoration: none;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        nav {
-            display: flex;
-            gap: 1.5rem;
-        }
-        nav a {
-            text-decoration: none;
-            color: var(--fg);
-            font-weight: 500;
-        }
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .theme-toggle {
-            background: var(--border);
-            border: none;
-            border-radius: 2rem;
-            padding: 0.5rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-        }
-        .theme-toggle svg {
-            width: 20px;
-            height: 20px;
-            stroke: var(--fg);
-        }
-        .user-balance-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .btn-balance {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 2rem;
-            color: white;
-            cursor: pointer;
-        }
-        /* Админ панель */
-        .admin-panel {
-            padding: 2rem 0;
-        }
-        h1 {
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .quick-actions, .money-actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-        }
-        .quick-action-btn, .money-action-btn {
-            background: var(--card);
-            border: 1px solid var(--border);
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--fg);
-            font-size: 0.9rem;
-        }
-        .quick-action-btn:hover, .money-action-btn:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-2px);
-        }
-        .admin-balance-summary, .financial-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .summary-card, .financial-stat {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            text-align: center;
-        }
-        .summary-card h3, .financial-value {
-            font-size: 1.8rem;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-        .admin-balance-section {
-            background: var(--card);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin-top: 1rem;
-            border: 1px solid var(--border);
-        }
-        .admin-balance-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        .table-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        .admin-balance-filters {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-        .filter-btn {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            padding: 0.5rem 1rem;
-            border-radius: 2rem;
-            cursor: pointer;
-            color: var(--fg);
-        }
-        .filter-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-        .search-box-admin {
-            display: flex;
-            align-items: center;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 2rem;
-            padding: 0.5rem 1rem;
-            gap: 0.5rem;
-        }
-        .search-box-admin input {
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--fg);
-        }
-        .admin-balance-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .admin-balance-table th, .admin-balance-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-        .admin-balance-table th {
-            background: var(--bg);
-            font-weight: 600;
-        }
-        .user-info-cell {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .user-avatar-small {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-        .role-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 2rem;
-            font-size: 0.8rem;
-        }
-        .role-admin { background: #fef3c7; color: #92400e; }
-        .role-tutor { background: #dbeafe; color: #1e40af; }
-        .role-student { background: #dcfce7; color: #15803d; }
-        body.dark .role-admin { background: #422006; color: #fde047; }
-        body.dark .role-tutor { background: #1e3a8a; color: #bfdbfe; }
-        body.dark .role-student { background: #14532d; color: #86efac; }
-        .balance-positive-admin { color: #10b981; }
-        .balance-negative-admin { color: #ef4444; }
-        .status-badge-admin {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 2rem;
-            font-size: 0.8rem;
-        }
-        .status-active-admin { background: #dcfce7; color: #15803d; }
-        .status-inactive-admin { background: #fee2e2; color: #b91c1c; }
-        .action-buttons-admin {
-            display: flex;
-            gap: 0.5rem;
-        }
-        .action-buttons-admin button {
-            width: 32px;
-            height: 32px;
-            border-radius: 0.5rem;
-            border: none;
-            cursor: pointer;
-            background: var(--bg);
-            color: var(--fg);
-        }
-        .export-btn {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        /* Модальные окна */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: var(--card);
-            border-radius: 1rem;
-            width: 90%;
-            max-width: 500px;
-            padding: 1.5rem;
-            position: relative;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--muted-fg);
-        }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 0.25rem;
-            font-weight: 500;
-        }
-        .form-control, select, textarea, input {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            background: var(--bg);
-            color: var(--fg);
-        }
-        .btn {
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-secondary { background: var(--border); color: var(--fg); }
-        .btn-danger { background: #ef4444; color: white; }
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-        @media (max-width: 768px) {
-            .admin-balance-table th, .admin-balance-table td { padding: 0.5rem; }
-            .user-info-cell { flex-direction: column; align-items: start; }
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <div class="logo"><a href="index.html">УчебаВместе</a></div>
-                <nav><a href="index.html">Предметы</a><a href="teacher.html">Репетиторы</a></nav>
-                <div class="header-actions">
-                   
-                    <div class="user-balance-header"><span class="balance-amount">Админ</span><button class="btn-balance" onclick="showSystemBalance()"><i class="fas fa-money-bill-wave"></i> Система</button></div>
-                </div>
-            </div>
-        </div>
-    </header>
+    ];
 
-    <section class="admin-panel">
-        <div class="container">
-            <h1><i class="fas fa-money-bill-wave"></i> Управление балансами</h1>
-            <div class="quick-actions">
-                <button class="quick-action-btn" onclick="showMoneyStatsAdmin()"><i class="fas fa-chart-line"></i> Статистика</button>
-                <button class="quick-action-btn" onclick="exportAllBalancesCSV()"><i class="fas fa-download"></i> Экспорт всех (CSV)</button>
-                <button class="quick-action-btn" onclick="exportBalancesExcel()"><i class="fas fa-file-excel"></i> Excel (текущий список)</button>
-            </div>
-
-            <div class="admin-balance-summary" id="summaryContainer">
-                <div class="summary-card"><h3 id="totalSystemBalance">0 ₽</h3><p>Общий баланс</p></div>
-                <div class="summary-card"><h3 id="totalStudentsBalance">0 ₽</h3><p>Ученики</p></div>
-                <div class="summary-card"><h3 id="totalTutorsBalance">0 ₽</h3><p>Репетиторы</p></div>
-                <div class="summary-card"><h3 id="pendingPayouts">0 ₽</h3><p>Ожидает выплат</p></div>
-            </div>
-
-            <div class="admin-balance-section">
-                <div class="admin-balance-header">
-                    <h2><i class="fas fa-users"></i> Балансы пользователей</h2>
-                    <div><button class="btn btn-primary" onclick="showAddMoneyModal()"><i class="fas fa-plus"></i> Пополнить</button>
-                    <button class="btn btn-secondary" onclick="showWithdrawModal()"><i class="fas fa-minus"></i> Списать</button></div>
-                </div>
-                <div class="table-actions">
-                    <div class="admin-balance-filters" id="filterGroup">
-                        <button class="filter-btn active" data-filter="all" onclick="filterTable('all', this)">Все</button>
-                        <button class="filter-btn" data-filter="student" onclick="filterTable('student', this)">Ученики</button>
-                        <button class="filter-btn" data-filter="tutor" onclick="filterTable('tutor', this)">Репетиторы</button>
-                        <button class="filter-btn" data-filter="admin" onclick="filterTable('admin', this)">Админы</button>
-                        <button class="filter-btn" data-filter="positive" onclick="filterTable('positive', this)">Баланс > 0</button>
-                    </div>
-                    <div class="search-box-admin"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Поиск..." oninput="searchBalances()"></div>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table class="admin-balance-table" id="balanceTable">
-                        <thead><tr><th>ID</th><th>Пользователь</th><th>Роль</th><th>Баланс</th><th>Статус</th><th>Активность</th><th>Действия</th></tr></thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
-                </div>
-                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
-                    <button class="export-btn" onclick="exportCSV()"><i class="fas fa-file-csv"></i> CSV (тек. список)</button>
-                    <button class="export-btn" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
-                    <button class="export-btn" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Excel</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Модалки -->
-    <div id="balanceModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>Управление балансом</h3><span class="modal-close" onclick="closeModal('balanceModal')">&times;</span></div><div class="modal-body"><p><strong>Пользователь:</strong> <span id="modalUserName"></span></p><p><strong>Текущий баланс:</strong> <span id="modalUserBalance"></span></p><div class="form-group"><label>Сумма (₽)</label><input type="number" id="amountInput" class="form-control"></div><div class="form-group"><label>Тип</label><select id="opType" class="form-control"><option value="add">Пополнение</option><option value="subtract">Списание</option></select></div><div class="form-group"><label>Комментарий</label><textarea id="commentInput" class="form-control"></textarea></div><input type="hidden" id="currentUserId"></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('balanceModal')">Отмена</button><button class="btn btn-primary" onclick="processBalanceChange()">Применить</button></div></div></div>
-
-    <div id="addMoneyModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>Пополнение баланса</h3><span class="modal-close" onclick="closeModal('addMoneyModal')">&times;</span></div><div class="modal-body"><div class="form-group"><label>Пользователь</label><select id="userSelectAdd" class="form-control"></select></div><div class="form-group"><label>Сумма (₽)</label><input type="number" id="addAmount" class="form-control"></div><div class="form-group"><label>Комментарий</label><textarea id="addComment" class="form-control"></textarea></div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('addMoneyModal')">Отмена</button><button class="btn btn-primary" onclick="processAddMoney()">Пополнить</button></div></div></div>
-
-    <div id="withdrawModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>Списание средств</h3><span class="modal-close" onclick="closeModal('withdrawModal')">&times;</span></div><div class="modal-body"><div class="form-group"><label>Пользователь</label><select id="userSelectWithdraw" class="form-control"></select></div><div class="form-group"><label>Сумма (₽)</label><input type="number" id="withdrawAmount" class="form-control"></div><div class="form-group"><label>Причина</label><textarea id="withdrawComment" class="form-control"></textarea></div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('withdrawModal')">Отмена</button><button class="btn btn-danger" onclick="processWithdraw()">Списать</button></div></div></div>
-
-    <div id="systemBalanceModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>Системный баланс</h3><span class="modal-close" onclick="closeModal('systemBalanceModal')">&times;</span></div><div class="modal-body"><div style="text-align:center; font-size:2rem; font-weight:bold;" id="sysBalanceValue"></div><p>Общая сумма всех балансов</p></div></div></div>
-
-    <script>
-        // ======================= ДАННЫЕ =======================
-        let users = [
-            {id:1, name:"Админ Админов", email:"admin@ucheba-vmeste.ru", role:"admin", balance:0, status:"active", lastActive:"Сегодня, 10:30"},
-            {id:2, name:"Анна Петрова", email:"anna@ucheba-vmeste.ru", role:"tutor", balance:45000, status:"active", lastActive:"Вчера, 18:45"},
-            {id:3, name:"Иван Иванов", email:"student@example.com", role:"student", balance:5000, status:"active", lastActive:"Сегодня, 09:15"},
-            {id:4, name:"Алексей Козлов", email:"alexey@ucheba-vmeste.ru", role:"tutor", balance:38500, status:"active", lastActive:"Вчера, 14:20"},
-            {id:5, name:"Иван Сидоров", email:"ivan@ucheba-vmeste.ru", role:"tutor", balance:52300, status:"active", lastActive:"Сегодня, 11:45"},
-            {id:6, name:"Петр Сидоров", email:"peter@example.com", role:"student", balance:0, status:"inactive", lastActive:"3 дня назад"},
-            {id:7, name:"Мария Волкова", email:"maria@example.com", role:"student", balance:12500, status:"active", lastActive:"Вчера, 16:30"},
-            {id:8, name:"Дмитрий Попов", email:"dmitry@ucheba-vmeste.ru", role:"tutor", balance:67800, status:"active", lastActive:"Сегодня, 08:15"}
-        ];
-
-        let currentFilter = "all";
-        let searchTerm = "";
-
-        // Вспомогательные функции
-        function getFilteredUsers() {
-            let filtered = [...users];
-            if (currentFilter === "student") filtered = filtered.filter(u => u.role === "student");
-            else if (currentFilter === "tutor") filtered = filtered.filter(u => u.role === "tutor");
-            else if (currentFilter === "admin") filtered = filtered.filter(u => u.role === "admin");
-            else if (currentFilter === "positive") filtered = filtered.filter(u => u.balance > 0);
-            if (searchTerm) {
-                filtered = filtered.filter(u => u.name.toLowerCase().includes(searchTerm) || u.email.toLowerCase().includes(searchTerm));
-            }
-            return filtered;
-        }
-
-        function updateSummary() {
-            let total = 0, studentsTotal = 0, tutorsTotal = 0;
-            users.forEach(u => {
-                total += u.balance;
-                if (u.role === "student") studentsTotal += u.balance;
-                if (u.role === "tutor") tutorsTotal += u.balance;
+    // ========================================================
+    // 2. ИНИЦИАЛИЗАЦИЯ ХРАНИЛИЩА
+    // ========================================================
+    function initUsersStorage() {
+        if (!localStorage.getItem('ucheba_users')) {
+            localStorage.setItem('ucheba_users', JSON.stringify(testUsers));
+            console.log('✅ Демо-пользователи созданы в localStorage');
+        } else {
+            // Проверяем, что все демо-пользователи на месте (на случай если их удалили вручную)
+            const existingUsers = JSON.parse(localStorage.getItem('ucheba_users')) || [];
+            let needUpdate = false;
+            
+            testUsers.forEach(demoUser => {
+                if (!existingUsers.find(u => u.login === demoUser.login)) {
+                    existingUsers.push(demoUser);
+                    needUpdate = true;
+                }
             });
-            document.getElementById("totalSystemBalance").innerText = total.toLocaleString('ru-RU') + " ₽";
-            document.getElementById("totalStudentsBalance").innerText = studentsTotal.toLocaleString('ru-RU') + " ₽";
-            document.getElementById("totalTutorsBalance").innerText = tutorsTotal.toLocaleString('ru-RU') + " ₽";
-            document.getElementById("pendingPayouts").innerText = (tutorsTotal * 0.15).toLocaleString('ru-RU') + " ₽";
-            document.getElementById("sysBalanceValue") && (document.getElementById("sysBalanceValue").innerText = total.toLocaleString('ru-RU') + " ₽");
-        }
-
-        function renderTable() {
-            const filtered = getFilteredUsers();
-            const tbody = document.getElementById("tableBody");
-            tbody.innerHTML = "";
-            filtered.forEach(user => {
-                const initials = user.name.split(" ").map(n=>n[0]).join("").toUpperCase();
-                const roleLabel = user.role === "admin" ? "Администратор" : (user.role === "tutor" ? "Репетитор" : "Ученик");
-                const balanceClass = user.balance > 0 ? "balance-positive-admin" : (user.balance < 0 ? "balance-negative-admin" : "");
-                const statusText = user.status === "active" ? "Активен" : "Неактивен";
-                const statusClass = user.status === "active" ? "status-active-admin" : "status-inactive-admin";
-                const row = `<tr>
-                    <td>${user.id}</td>
-                    <td><div class="user-info-cell"><div class="user-avatar-small">${initials}</div><div><div class="user-name">${user.name}</div><div class="user-email">${user.email}</div></div></div></td>
-                    <td><span class="role-badge role-${user.role}">${roleLabel}</span></td>
-                    <td class="${balanceClass}">${user.balance.toLocaleString('ru-RU')} ₽</td>
-                    <td><span class="status-badge-admin ${statusClass}">${statusText}</span></td>
-                    <td>${user.lastActive}</td>
-                    <td><div class="action-buttons-admin"><button onclick="openBalanceModal(${user.id})"><i class="fas fa-money-bill-wave"></i></button><button onclick="alert('История для ${user.name}')"><i class="fas fa-history"></i></button></div></td>
-                </tr>`;
-                tbody.insertAdjacentHTML("beforeend", row);
-            });
-            updateSummary();
-        }
-
-        function filterTable(filter, btn) {
-            currentFilter = filter;
-            document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            renderTable();
-        }
-
-        function searchBalances() {
-            searchTerm = document.getElementById("searchInput").value.toLowerCase();
-            renderTable();
-        }
-
-        // Модальное управление балансом
-        function openBalanceModal(userId) {
-            const user = users.find(u => u.id === userId);
-            if (!user) return;
-            document.getElementById("modalUserName").innerText = user.name;
-            document.getElementById("modalUserBalance").innerText = user.balance.toLocaleString('ru-RU') + " ₽";
-            document.getElementById("currentUserId").value = userId;
-            document.getElementById("amountInput").value = "";
-            document.getElementById("opType").value = "add";
-            document.getElementById("commentInput").value = "";
-            document.getElementById("balanceModal").style.display = "flex";
-        }
-
-        function processBalanceChange() {
-            const userId = parseInt(document.getElementById("currentUserId").value);
-            const amount = parseFloat(document.getElementById("amountInput").value);
-            const type = document.getElementById("opType").value;
-            const comment = document.getElementById("commentInput").value;
-            if (isNaN(amount) || amount <= 0) { alert("Введите корректную сумму"); return; }
-            const user = users.find(u => u.id === userId);
-            if (!user) return;
-            if (type === "add") user.balance += amount;
-            else if (type === "subtract") {
-                if (user.balance < amount) { alert("Недостаточно средств"); return; }
-                user.balance -= amount;
+            
+            if (needUpdate) {
+                localStorage.setItem('ucheba_users', JSON.stringify(existingUsers));
+                console.log('✅ Демо-пользователи восстановлены');
             }
-            alert(`Операция выполнена. Новый баланс ${user.name}: ${user.balance.toLocaleString('ru-RU')} ₽\nКомментарий: ${comment}`);
-            closeModal("balanceModal");
-            renderTable();
         }
+    }
 
-        // Модалки пополнения/списания для быстрых действий
-        function fillUserSelects() {
-            const options = users.map(u => `<option value="${u.id}">${u.name} (${u.role === "student" ? "Ученик" : "Репетитор"}) - ${u.balance.toLocaleString('ru-RU')} ₽</option>`).join("");
-            document.getElementById("userSelectAdd").innerHTML = '<option value="">Выберите</option>' + options;
-            document.getElementById("userSelectWithdraw").innerHTML = '<option value="">Выберите</option>' + options;
-        }
+    // ========================================================
+    // 3. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+    // ========================================================
+    function getUsers() {
+        return JSON.parse(localStorage.getItem('ucheba_users')) || [];
+    }
 
-        function showAddMoneyModal() { fillUserSelects(); document.getElementById("addMoneyModal").style.display = "flex"; }
-        function showWithdrawModal() { fillUserSelects(); document.getElementById("withdrawModal").style.display = "flex"; }
+    function saveUsers(users) {
+        localStorage.setItem('ucheba_users', JSON.stringify(users));
+    }
 
-        function processAddMoney() {
-            const userId = parseInt(document.getElementById("userSelectAdd").value);
-            const amount = parseFloat(document.getElementById("addAmount").value);
-            const comment = document.getElementById("addComment").value;
-            if (!userId || isNaN(amount) || amount <= 0) { alert("Выберите пользователя и сумму"); return; }
-            const user = users.find(u => u.id === userId);
-            if (user) { user.balance += amount; alert(`Пополнение на ${amount}₽. Новый баланс ${user.name}: ${user.balance.toLocaleString('ru-RU')}₽`); }
-            closeModal("addMoneyModal");
-            renderTable();
-        }
+    function findUserByLogin(login) {
+        const users = getUsers();
+        return users.find(u => u.login.toLowerCase() === login.toLowerCase());
+    }
 
-        function processWithdraw() {
-            const userId = parseInt(document.getElementById("userSelectWithdraw").value);
-            const amount = parseFloat(document.getElementById("withdrawAmount").value);
-            const comment = document.getElementById("withdrawComment").value;
-            if (!userId || isNaN(amount) || amount <= 0) { alert("Выберите пользователя и сумму"); return; }
-            const user = users.find(u => u.id === userId);
-            if (user && user.balance >= amount) { user.balance -= amount; alert(`Списано ${amount}₽. Новый баланс ${user.name}: ${user.balance.toLocaleString('ru-RU')}₽`); }
-            else if (user) alert("Недостаточно средств");
-            closeModal("withdrawModal");
-            renderTable();
-        }
+    function findUserByEmail(email) {
+        const users = getUsers();
+        return users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+    }
 
-        function showSystemBalance() {
-            updateSummary();
-            document.getElementById("systemBalanceModal").style.display = "flex";
-        }
-
-        function showMoneyStatsAdmin() {
-            const total = users.reduce((s,u)=>s+u.balance,0);
-            alert(`📊 Финансовая статистика\nОбщий баланс: ${total.toLocaleString('ru-RU')} ₽\nУченики: ${users.filter(u=>u.role==='student').reduce((s,u)=>s+u.balance,0).toLocaleString('ru-RU')} ₽\nРепетиторы: ${users.filter(u=>u.role==='tutor').reduce((s,u)=>s+u.balance,0).toLocaleString('ru-RU')} ₽`);
-        }
-
-        function exportAllBalancesCSV() { exportDataToCSV(users, "all_balances"); }
-        function exportCSV() { exportDataToCSV(getFilteredUsers(), "balances_filtered"); }
-        function exportExcel() { exportToExcel(getFilteredUsers(), "balances_export"); }
+    function findUserByLoginOrEmail(loginOrEmail) {
+        // Сначала пробуем найти по логину
+        let user = findUserByLogin(loginOrEmail);
+        if (user) return user;
         
-        function exportDataToCSV(data, filename) {
-            if (!data.length) { alert("Нет данных"); return; }
-            const headers = ["ID","Имя","Email","Роль","Баланс","Статус","Последняя активность"];
-            const rows = data.map(u => [u.id, u.name, u.email, u.role==="admin"?"Админ":u.role==="tutor"?"Репетитор":"Ученик", u.balance, u.status==="active"?"Активен":"Неактивен", u.lastActive]);
-            const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
-            const blob = new Blob(["\uFEFF" + csvContent], {type: "text/csv;charset=utf-8;"});
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `${filename}.csv`;
-            link.click();
-            URL.revokeObjectURL(link.href);
+        // Потом по email
+        user = findUserByEmail(loginOrEmail);
+        if (user) return user;
+        
+        return null;
+    }
+
+    function authenticateUser(loginOrEmail, password) {
+        const user = findUserByLoginOrEmail(loginOrEmail);
+        if (user && user.password === password) {
+            return user;
         }
+        return null;
+    }
 
-        function exportToExcel(data, filename) {
-            if (!data.length) { alert("Нет данных"); return; }
-            const wsData = data.map(u => ({ID: u.id, Имя: u.name, Email: u.email, Роль: u.role==="admin"?"Админ":u.role==="tutor"?"Репетитор":"Ученик", Баланс: u.balance, Статус: u.status==="active"?"Активен":"Неактивен", "Посл.активность": u.lastActive}));
-            const ws = XLSX.utils.json_to_sheet(wsData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Балансы");
-            XLSX.writeFile(wb, `${filename}.xlsx`);
+    // ========================================================
+    // 4. ПЕРЕКЛЮЧЕНИЕ МЕЖДУ ФОРМАМИ
+    // ========================================================
+    function showForm(formType) {
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loginTab = document.getElementById('login-tab');
+        const registerTab = document.getElementById('register-tab');
+        
+        if (formType === 'login') {
+            loginForm.classList.add('active');
+            registerForm.classList.remove('active');
+            loginTab.classList.add('active');
+            registerTab.classList.remove('active');
+            clearErrors('login');
+            clearSuccess('login');
+            clearSuccess('register');
+        } else {
+            loginForm.classList.remove('active');
+            registerForm.classList.add('active');
+            loginTab.classList.remove('active');
+            registerTab.classList.add('active');
+            clearErrors('register');
+            clearSuccess('login');
+            clearSuccess('register');
         }
+    }
 
-        async function exportPDF() {
-            const data = getFilteredUsers();
-            if (!data.length) { alert("Нет данных"); return; }
-            const rowsHtml = data.map(u => `<tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.role==="admin"?"Админ":u.role==="tutor"?"Репетитор":"Ученик"}</td><td>${u.balance.toLocaleString('ru-RU')} ₽</td><td>${u.status==="active"?"Активен":"Неактивен"}</td><td>${u.lastActive}</td></tr>`).join("");
-            const html = `<html><head><meta charset="UTF-8"><title>Балансы</title><style>body{font-family:sans-serif;} table{border-collapse:collapse;width:100%} th,td{border:1px solid #ccc;padding:8px;text-align:left}</style></head><body><h2>Отчет по балансам</h2><table><thead><tr><th>ID</th><th>Имя</th><th>Email</th><th>Роль</th><th>Баланс</th><th>Статус</th><th>Активность</th></tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
-            const element = document.createElement("div");
-            element.innerHTML = html;
-            document.body.appendChild(element);
-            await html2pdf().from(element).set({margin:0.5, filename:`balances_${Date.now()}.pdf`, html2canvas:{scale:2}}).save();
-            document.body.removeChild(element);
+    // ========================================================
+    // 5. ОТОБРАЖЕНИЕ ОШИБОК И УСПЕХА
+    // ========================================================
+    function showErrors(formType, errors) {
+        const errorContainer = document.getElementById(`${formType}-errors`);
+        errorContainer.innerHTML = '';
+        errorContainer.classList.remove('show');
+        
+        if (errors && errors.length > 0) {
+            errors.forEach(error => {
+                const div = document.createElement('div');
+                div.className = 'error-message';
+                div.textContent = error;
+                errorContainer.appendChild(div);
+            });
+            errorContainer.classList.add('show');
         }
+    }
 
-        function closeModal(id) { document.getElementById(id).style.display = "none"; }
-        window.onclick = e => { if (e.target.classList && e.target.classList.contains("modal")) e.target.style.display = "none"; };
+    function showSuccess(formType, message) {
+        const successContainer = document.getElementById(`${formType}-success`);
+        successContainer.innerHTML = '';
+        successContainer.classList.remove('show');
+        
+        const div = document.createElement('div');
+        div.className = 'success-message';
+        div.textContent = message;
+        successContainer.appendChild(div);
+        successContainer.classList.add('show');
+    }
 
-        // Темная тема
-        document.getElementById("themeToggle")?.addEventListener("click", () => {
-            document.body.classList.toggle("dark");
+    function clearErrors(formType) {
+        const container = document.getElementById(`${formType}-errors`);
+        if (container) {
+            container.innerHTML = '';
+            container.classList.remove('show');
+        }
+    }
+
+    function clearSuccess(formType) {
+        const container = document.getElementById(`${formType}-success`);
+        if (container) {
+            container.innerHTML = '';
+            container.classList.remove('show');
+        }
+    }
+
+    // ========================================================
+    // 6. ВАЛИДАЦИЯ ФОРМ
+    // ========================================================
+    function validateLoginForm() {
+        const login = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+        const errors = [];
+        
+        // Очищаем ошибки полей
+        document.getElementById('login-username-error').textContent = '';
+        document.getElementById('login-username-error').classList.remove('show');
+        document.getElementById('login-password-error').textContent = '';
+        document.getElementById('login-password-error').classList.remove('show');
+        
+        if (!login) {
+            document.getElementById('login-username-error').textContent = 'Введите логин или email';
+            document.getElementById('login-username-error').classList.add('show');
+            errors.push('Введите логин или email');
+        }
+        
+        if (!password) {
+            document.getElementById('login-password-error').textContent = 'Введите пароль';
+            document.getElementById('login-password-error').classList.add('show');
+            errors.push('Введите пароль');
+        } else if (password.length < 6) {
+            document.getElementById('login-password-error').textContent = 'Пароль должен быть не менее 6 символов';
+            document.getElementById('login-password-error').classList.add('show');
+            errors.push('Пароль должен быть не менее 6 символов');
+        }
+        
+        return errors;
+    }
+
+    function validateRegisterForm() {
+        const firstName = document.getElementById('register-first-name').value.trim();
+        const lastName = document.getElementById('register-last-name').value.trim();
+        const login = document.getElementById('register-username').value.trim();
+        const password = document.getElementById('register-password').value;
+        const confirmPassword = document.getElementById('register-confirm-password').value;
+        const userType = document.getElementById('register-user-type').value;
+        const agreeTerms = document.getElementById('register-agree-terms').checked;
+        const errors = [];
+        
+        // Очищаем ошибки полей
+        ['register-first-name', 'register-last-name', 'register-username', 
+         'register-password', 'register-confirm-password', 'register-user-type', 
+         'register-terms-error'].forEach(id => {
+            const el = document.getElementById(id + '-error') || document.getElementById(id);
+            if (el) {
+                el.textContent = '';
+                el.classList.remove('show');
+            }
         });
+        
+        // Имя
+        if (!firstName) {
+            document.getElementById('register-first-name-error').textContent = 'Введите имя';
+            document.getElementById('register-first-name-error').classList.add('show');
+            errors.push('Введите имя');
+        } else if (firstName.length < 2) {
+            document.getElementById('register-first-name-error').textContent = 'Имя слишком короткое';
+            document.getElementById('register-first-name-error').classList.add('show');
+            errors.push('Имя слишком короткое');
+        }
+        
+        // Фамилия
+        if (!lastName) {
+            document.getElementById('register-last-name-error').textContent = 'Введите фамилию';
+            document.getElementById('register-last-name-error').classList.add('show');
+            errors.push('Введите фамилию');
+        } else if (lastName.length < 2) {
+            document.getElementById('register-last-name-error').textContent = 'Фамилия слишком короткая';
+            document.getElementById('register-last-name-error').classList.add('show');
+            errors.push('Фамилия слишком короткая');
+        }
+        
+        // Логин
+        if (!login) {
+            document.getElementById('register-username-error').textContent = 'Введите логин';
+            document.getElementById('register-username-error').classList.add('show');
+            errors.push('Введите логин');
+        } else if (login.length < 3) {
+            document.getElementById('register-username-error').textContent = 'Логин должен быть не менее 3 символов';
+            document.getElementById('register-username-error').classList.add('show');
+            errors.push('Логин должен быть не менее 3 символов');
+        } else if (!/^[a-zA-Z0-9_]+$/.test(login)) {
+            document.getElementById('register-username-error').textContent = 'Только буквы, цифры и _';
+            document.getElementById('register-username-error').classList.add('show');
+            errors.push('Только буквы, цифры и _');
+        } else if (findUserByLogin(login)) {
+            document.getElementById('register-username-error').textContent = 'Этот логин уже занят';
+            document.getElementById('register-username-error').classList.add('show');
+            errors.push('Этот логин уже занят');
+        }
+        
+        // Пароль
+        if (!password) {
+            document.getElementById('register-password-error').textContent = 'Введите пароль';
+            document.getElementById('register-password-error').classList.add('show');
+            errors.push('Введите пароль');
+        } else if (password.length < 6) {
+            document.getElementById('register-password-error').textContent = 'Пароль должен быть не менее 6 символов';
+            document.getElementById('register-password-error').classList.add('show');
+            errors.push('Пароль должен быть не менее 6 символов');
+        }
+        
+        // Подтверждение пароля
+        if (!confirmPassword) {
+            document.getElementById('register-confirm-password-error').textContent = 'Подтвердите пароль';
+            document.getElementById('register-confirm-password-error').classList.add('show');
+            errors.push('Подтвердите пароль');
+        } else if (password !== confirmPassword) {
+            document.getElementById('register-confirm-password-error').textContent = 'Пароли не совпадают';
+            document.getElementById('register-confirm-password-error').classList.add('show');
+            errors.push('Пароли не совпадают');
+        }
+        
+        // Тип пользователя
+        if (!userType) {
+            document.getElementById('register-user-type-error').textContent = 'Выберите тип аккаунта';
+            document.getElementById('register-user-type-error').classList.add('show');
+            errors.push('Выберите тип аккаунта');
+        }
+        
+        // Согласие
+        if (!agreeTerms) {
+            document.getElementById('register-terms-error').textContent = 'Согласитесь с условиями';
+            document.getElementById('register-terms-error').classList.add('show');
+            errors.push('Согласитесь с условиями');
+        }
+        
+        // Проверка предметов для репетитора
+        if (userType === 'tutor') {
+            const subjects = document.querySelectorAll('input[name="tutor_subjects"]:checked');
+            if (subjects.length === 0) {
+                document.getElementById('tutor-subjects-error').textContent = 'Выберите хотя бы один предмет';
+                document.getElementById('tutor-subjects-error').classList.add('show');
+                errors.push('Выберите хотя бы один предмет');
+            }
+        }
+        
+        // Проверка языков для переводчика
+        if (userType === 'translator') {
+            const languages = document.querySelectorAll('input[name="translator_languages"]:checked');
+            if (languages.length === 0) {
+                document.getElementById('translator-languages-error').textContent = 'Выберите хотя бы один язык';
+                document.getElementById('translator-languages-error').classList.add('show');
+                errors.push('Выберите хотя бы один язык');
+            }
+        }
+        
+        return errors;
+    }
 
-        renderTable();
-        updateSummary();
-    </script>
-</body>
-</html>
+    // ========================================================
+    // 7. ПЕРЕКЛЮЧЕНИЕ ВИДИМОСТИ ПАРОЛЯ
+    // ========================================================
+    function setupPasswordToggle(passwordId, toggleId) {
+        const toggleBtn = document.getElementById(toggleId);
+        const passwordInput = document.getElementById(passwordId);
+        
+        if (!toggleBtn || !passwordInput) return;
+        
+        toggleBtn.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.querySelector('svg').innerHTML = type === 'text' 
+                ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'
+                : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+        });
+    }
+
+    // ========================================================
+    // 8. СИЛА ПАРОЛЯ
+    // ========================================================
+    function setupPasswordStrength() {
+        const passwordInput = document.getElementById('register-password');
+        const strengthFill = document.getElementById('strength-fill');
+        const strengthText = document.getElementById('strength-text');
+        
+        if (!passwordInput) return;
+        
+        passwordInput.addEventListener('input', function() {
+            const value = this.value;
+            let strength = 0;
+            let color = '#e53e3e';
+            let text = 'Слабый пароль';
+            
+            if (value.length >= 6) strength += 25;
+            if (value.match(/[a-z]/) && value.match(/[A-Z]/)) strength += 25;
+            if (value.match(/\d/)) strength += 25;
+            if (value.match(/[^a-zA-Z\d]/)) strength += 25;
+            
+            strengthFill.style.width = Math.min(strength, 100) + '%';
+            
+            if (strength >= 75) {
+                color = '#38a169';
+                text = 'Сильный пароль';
+            } else if (strength >= 50) {
+                color = '#d69e2e';
+                text = 'Средний пароль';
+            }
+            
+            strengthFill.style.background = color;
+            strengthText.textContent = text;
+            strengthText.style.color = color;
+        });
+    }
+
+    // ========================================================
+    // 9. ПОКАЗ ДОПОЛНИТЕЛЬНЫХ ПОЛЕЙ
+    // ========================================================
+    function setupRoleFields() {
+        const userTypeSelect = document.getElementById('register-user-type');
+        const tutorFields = document.getElementById('tutor-fields');
+        const translatorFields = document.getElementById('translator-fields');
+        
+        if (!userTypeSelect) return;
+        
+        userTypeSelect.addEventListener('change', function() {
+            tutorFields.classList.remove('show');
+            translatorFields.classList.remove('show');
+            
+            if (this.value === 'tutor') {
+                tutorFields.classList.add('show');
+            } else if (this.value === 'translator') {
+                translatorFields.classList.add('show');
+            }
+        });
+    }
+
+    // ========================================================
+    // 10. ДЕМО-АККАУНТЫ
+    // ========================================================
+    function setupDemoAccounts() {
+        const toggleLink = document.getElementById('showDemoAccounts');
+        const container = document.getElementById('demoAccountsContainer');
+        
+        if (!toggleLink || !container) return;
+        
+        toggleLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            container.classList.toggle('show');
+            this.textContent = container.classList.contains('show') ? 'Скрыть демо-аккаунты' : 'Демо-аккаунты';
+        });
+        
+        // Делаем функцию доступной глобально
+        window.useDemoAccount = function(login, password) {
+            showForm('login');
+            document.getElementById('login-username').value = login;
+            document.getElementById('login-password').value = password;
+            document.getElementById('remember-me').checked = true;
+            
+            if (container) {
+                container.classList.remove('show');
+                toggleLink.textContent = 'Демо-аккаунты';
+            }
+            
+            const success = document.getElementById('login-success');
+            success.textContent = 'Демо-аккаунт загружен. Нажмите "Войти"';
+            success.classList.add('show');
+            
+            setTimeout(() => success.classList.remove('show'), 3000);
+            
+            document.getElementById('login-btn').focus();
+        };
+    }
+
+    // ========================================================
+    // 11. ОБРАБОТЧИК ВХОДА
+    // ========================================================
+    function setupLoginHandler() {
+        const form = document.getElementById('login-form');
+        if (!form) return;
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('login-btn');
+            btn.classList.add('loading');
+            
+            const errors = validateLoginForm();
+            
+            if (errors.length === 0) {
+                const loginOrEmail = document.getElementById('login-username').value.trim();
+                const password = document.getElementById('login-password').value;
+                const rememberMe = document.getElementById('remember-me').checked;
+                
+                // Аутентификация
+                const user = authenticateUser(loginOrEmail, password);
+                
+                if (user) {
+                    // Сохраняем сессию
+                    localStorage.setItem('ucheba_current_user', JSON.stringify(user));
+                    
+                    if (rememberMe) {
+                        localStorage.setItem('remembered_login', loginOrEmail);
+                    } else {
+                        localStorage.removeItem('remembered_login');
+                    }
+                    
+                    showSuccess('login', 'Вход выполнен! Перенаправление...');
+                    btn.classList.remove('loading');
+                    
+                    // Определяем страницу для перенаправления
+                    let redirectPage = 'profile.html';
+                    if (user.user_type === 'admin') {
+                        redirectPage = 'admin_panel.html';
+                    } else if (user.user_type === 'tutor') {
+                        redirectPage = 'teacher_dashboard.html';
+                    }
+                    
+                    setTimeout(() => {
+                        window.location.href = redirectPage;
+                    }, 1000);
+                    
+                } else {
+                    btn.classList.remove('loading');
+                    
+                    document.getElementById('login-username-error').textContent = 'Неверный логин/email или пароль';
+                    document.getElementById('login-username-error').classList.add('show');
+                    document.getElementById('login-password-error').textContent = 'Неверный логин/email или пароль';
+                    document.getElementById('login-password-error').classList.add('show');
+                    
+                    showErrors('login', ['Неверный логин/email или пароль']);
+                }
+            } else {
+                btn.classList.remove('loading');
+                showErrors('login', errors);
+            }
+        });
+    }
+
+    // ========================================================
+    // 12. ОБРАБОТЧИК РЕГИСТРАЦИИ
+    // ========================================================
+    function setupRegisterHandler() {
+        const form = document.getElementById('register-form');
+        if (!form) return;
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('register-btn');
+            btn.classList.add('loading');
+            
+            const errors = validateRegisterForm();
+            
+            if (errors.length === 0) {
+                // Собираем данные
+                const userData = {
+                    id: Date.now(),
+                    firstName: document.getElementById('register-first-name').value.trim(),
+                    lastName: document.getElementById('register-last-name').value.trim(),
+                    login: document.getElementById('register-username').value.trim(),
+                    password: document.getElementById('register-password').value,
+                    user_type: document.getElementById('register-user-type').value,
+                    registration_date: new Date().toISOString()
+                };
+                
+                // Добавляем дополнительные поля для репетитора
+                if (userData.user_type === 'tutor') {
+                    userData.subjects = Array.from(document.querySelectorAll('input[name="tutor_subjects"]:checked')).map(cb => cb.value);
+                    userData.education = document.getElementById('tutor-education').value.trim();
+                    userData.experience = document.getElementById('tutor-experience').value.trim();
+                    userData.hourly_rate = document.getElementById('tutor-hourly-rate').value;
+                }
+                
+                // Для переводчика
+                if (userData.user_type === 'translator') {
+                    userData.languages = Array.from(document.querySelectorAll('input[name="translator_languages"]:checked')).map(cb => cb.value);
+                    userData.education = document.getElementById('translator-education').value.trim();
+                    userData.experience = document.getElementById('translator-experience').value.trim();
+                    userData.specialization = document.getElementById('translator-specialization').value;
+                    userData.rate = document.getElementById('translator-rate').value;
+                }
+                
+                // Сохраняем
+                const users = getUsers();
+                users.push(userData);
+                saveUsers(users);
+                
+                // Автоматический вход
+                localStorage.setItem('ucheba_current_user', JSON.stringify(userData));
+                
+                showSuccess('register', 'Регистрация успешна! Перенаправление...');
+                btn.classList.remove('loading');
+                
+                // Определяем страницу для перенаправления
+                let redirectPage = 'profile.html';
+                if (userData.user_type === 'admin') {
+                    redirectPage = 'admin_panel.html';
+                } else if (userData.user_type === 'tutor') {
+                    redirectPage = 'teacher_dashboard.html';
+                }
+                
+                setTimeout(() => {
+                    window.location.href = redirectPage;
+                }, 1500);
+                
+            } else {
+                btn.classList.remove('loading');
+                showErrors('register', errors);
+            }
+        });
+    }
+
+    // ========================================================
+    // 13. ВОССТАНОВЛЕНИЕ ЗАПОМНЕННОГО ЛОГИНА
+    // ========================================================
+    function restoreRememberedLogin() {
+        const remembered = localStorage.getItem('remembered_login');
+        if (remembered) {
+            document.getElementById('login-username').value = remembered;
+            document.getElementById('remember-me').checked = true;
+        }
+    }
+
+    // ========================================================
+    // 14. ТЕМА
+    // ========================================================
+    function setupTheme() {
+        const toggle = document.getElementById('themeToggle');
+        if (!toggle) return;
+        
+        const isDark = localStorage.getItem('theme') === 'dark';
+        if (isDark) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        toggle.addEventListener('click', function() {
+            const dark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+        });
+    }
+
+    // ========================================================
+    // 15. ИНИЦИАЛИЗАЦИЯ
+    // ========================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Загрузка страницы авторизации');
+        
+        // Инициализация хранилища
+        initUsersStorage();
+        
+        // Настройка интерфейса
+        setupTheme();
+        setupPasswordToggle('login-password', 'toggle-login-password');
+        setupPasswordToggle('register-password', 'toggle-register-password');
+        setupPasswordToggle('register-confirm-password', 'toggle-register-confirm-password');
+        setupPasswordStrength();
+        setupRoleFields();
+        setupDemoAccounts();
+        
+        // Обработчики форм
+        setupLoginHandler();
+        setupRegisterHandler();
+        
+        // Восстановление данных
+        restoreRememberedLogin();
+        
+        console.log('✅ Страница авторизации готова');
+    });
+</script>
