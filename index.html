@@ -97,7 +97,7 @@
                     </p>
 
                     <div class="hero-buttons">
-                        <a href="login_simple.html" class="btn btn-large btn-primary">Начать обучение</a>
+                        <a href="centered_login_local.html" class="btn btn-large btn-primary">Начать обучение</a>
                         <a href="teacher.html" class="btn btn-large btn-outline">Смотреть репетиторов</a>
                     </div>
 
@@ -283,7 +283,7 @@
                         <li><a href="index.html">Главная</a></li>
                         <li><a href="#subjects">Предметы</a></li>
                         <li><a href="teacher.html">Репетиторы</a></li>
-                        <li><a href="login_simple.html">Личный кабинет</a></li>
+                        <li><a href="centered_login_local.html">Личный кабинет</a></li>
                     </ul>
                 </div>
                 
@@ -426,7 +426,7 @@
                 `;
             } else {
                 userAuthSection.innerHTML = `
-                    <a href="login_simple.html" class="btn btn-primary">Войти</a>
+                    <a href="centered_login_local.html" class="btn btn-primary">Войти</a>
                 `;
             }
         }
@@ -530,7 +530,7 @@
             <i class="fas fa-money-bill-wave"></i>
         </button>
     </div>
-    <a href="login_simple.html" class="btn btn-primary">Войти</a>
+    <a href="centered_login_local.html" class="btn btn-primary">Войти</a>
 </div>
 
 <!-- Добавьте этот скрипт в конце index.html: -->
@@ -563,7 +563,7 @@
         const currentUser = JSON.parse(localStorage.getItem('ucheba_current_user'));
         if (!currentUser) {
             alert('Пожалуйста, войдите в систему');
-            window.location.href = 'login_simple.html';
+            window.location.href = 'centered_login_local.html';
             return;
         }
         
