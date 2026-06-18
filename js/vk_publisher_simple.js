@@ -1,16 +1,51 @@
-// VK Publisher - упрощенная версия для публикации только в VK
+// VK Publisher - исправленная версия
+
+// ========== КОНФИГУРАЦИЯ ==========
 const VK_ACCESS_TOKEN = 'vk1.a.Dx2Q9eBUtyAznTAfQ_NaZP48G_WO0QtpV390AVQ4jvH4evJNUtOL9V2MrZ6ssAmm_DxDkGB3UzJKdYlKsT1ntAUHtvUYL6ItJMk9dB8bg7OZTqhFrDZesWNe35Z62TFvaCUCLbCenYivke-rgetpAH0RkNGkRqfVTyFQHGWceabFUA5eQh_3Ywm6hif80sXhm4rJSUAcqyknYLSfB3wwBg';
 const VK_API_VERSION = '5.199';
 const VK_GROUP_ID = '233570764';
 
 let postAttachments = [];
 
-// Инициализация VK Publisher
-function initVKPublisher() {
-    setupVKPublisherUI();
+// ========== ОТКРЫТИЕ / ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА ==========
+function openVKPublishModal() {
+    const modal = document.getElementById('vkPublishModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    } else {
+        console.error('Модальное окно не найдено!');
+        alert('Ошибка: модальное окно не найдено на странице');
+    }
 }
 
-// Настройка UI публикатора
+function closeVKPublishModal() {
+    const modal = document.getElementById('vkPublishModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Закрытие по клику на фон
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('vkPublishModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVKPublishModal();
+            }
+        });
+    }
+});
+
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
+function initVKPublisher() {
+    setupVKPublisherUI();
+    console.log('VK Publisher инициализирован');
+}
+
+// ========== НАСТРОЙКА UI ==========
 function setupVKPublisherUI() {
     // Обработчик загрузки изображений
     const imageUpload = document.getElementById('vkImageUpload');
@@ -45,13 +80,14 @@ function setupVKPublisherUI() {
     }
 }
 
-// Загрузка изображений
+// ========== ЗАГРУЗКА ИЗОБРАЖЕНИЙ ==========
 function handleImageUpload(e) {
     const files = e.target.files;
     handleDroppedFiles(files);
+    // Сбрасываем input, чтобы можно было загрузить те же файлы снова
+    e.target.value = '';
 }
 
-// Обработка перетащенных файлов
 function handleDroppedFiles(files) {
     if (postAttachments.length + files.length > 10) {
         showNotification('Максимум 10 изображений на пост', 'error');
@@ -64,7 +100,7 @@ function handleDroppedFiles(files) {
             return;
         }
         
-        if (file.size > 10 * 1024 * 1024) { // 10MB
+        if (file.size > 10 * 1024 * 1024) {
             showNotification(`Изображение "${file.name}" слишком большое (макс. 10MB)`, 'warning');
             return;
         }
@@ -83,7 +119,7 @@ function handleDroppedFiles(files) {
     });
 }
 
-// Обновление превью изображений
+// ========== ПРЕВЬЮ ИЗОБРАЖЕНИЙ ==========
 function updateImagePreview() {
     const preview = document.getElementById('vkImagePreview');
     if (!preview) return;
@@ -115,13 +151,12 @@ function updateImagePreview() {
     preview.innerHTML = html;
 }
 
-// Удаление изображения
 function removeImage(index) {
     postAttachments.splice(index, 1);
     updateImagePreview();
 }
 
-// Обновление счетчика символов
+// ========== СЧЕТЧИК СИМВОЛОВ ==========
 function updateCharCounter() {
     const input = document.getElementById('vkPostText');
     const counter = document.getElementById('charCounter');
@@ -140,30 +175,71 @@ function updateCharCounter() {
     }
 }
 
-// Основная функция публикации
+// ========== ОЧИСТКА ФОРМЫ ==========
+function clearVKForm() {
+    const postInput = document.getElementById('vkPostText');
+    if (postInput) postInput.value = '';
+    postAttachments = [];
+    updateCharCounter();
+    updateImagePreview();
+}
+
+// ========== ПУБЛИКАЦИЯ В VK ==========
 async function publishToVK() {
     const postText = document.getElementById('vkPostText').value.trim();
     
-    // Валидация
     if (!postText && postAttachments.length === 0) {
         showNotification('Введите текст или прикрепите изображения', 'error');
         return;
     }
     
-    // Показываем уведомление о начале публикации
+    // Отключаем кнопку на время публикации
+    const publishBtn = document.querySelector('.vk-actions .btn-primary');
+    if (publishBtn) {
+        publishBtn.disabled = true;
+        publishBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Публикация...';
+    }
+    
     showNotification('Начинаю публикацию в VK...', 'info');
     
     try {
-        // Подготовка параметров для VK
+        // Подготовка параметров
         const params = new URLSearchParams({
             owner_id: `-${VK_GROUP_ID}`,
             message: postText,
-            from_group: 1, // Всегда от имени группы
+            from_group: 1,
             access_token: VK_ACCESS_TOKEN,
             v: VK_API_VERSION
         });
         
-        // Публикация поста в VK
+        // Добавляем изображения (если есть)
+        if (postAttachments.length > 0) {
+            // Сначала загружаем изображения на сервер VK
+            const attachments = [];
+            
+            for (const img of postAttachments) {
+                try {
+                    // Загружаем изображение
+                    const uploadUrl = await getUploadServer();
+                    if (uploadUrl) {
+                        const photoData = await uploadPhoto(uploadUrl, img.file);
+                        if (photoData) {
+                            attachments.push(`photo${photoData.owner_id}_${photoData.id}`);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Ошибка загрузки изображения:', err);
+                }
+            }
+            
+            if (attachments.length > 0) {
+                params.append('attachments', attachments.join(','));
+            }
+        }
+        
+        console.log('Параметры запроса:', params.toString());
+        
+        // Отправляем запрос к VK API
         const response = await fetch('https://api.vk.com/method/wall.post', {
             method: 'POST',
             headers: {
@@ -173,84 +249,133 @@ async function publishToVK() {
         });
         
         const data = await response.json();
-        console.log('VK API Response:', data);
+        console.log('Ответ VK API:', data);
         
         if (data.error) {
-            // Ошибка от VK API
-            let errorMessage = 'Ошибка при публикации в VK: ';
+            let errorMessage = 'Ошибка VK: ';
             
             switch(data.error.error_code) {
-                case 14:
-                    errorMessage = 'Требуется капча. Попробуйте позже';
+                case 5: errorMessage = 'Неверный токен доступа. Проверьте токен';
                     break;
-                case 15:
-                    errorMessage = 'Доступ запрещен. Проверьте права токена';
+                case 6: errorMessage = 'Слишком много запросов. Подождите';
                     break;
-                case 214:
-                    errorMessage = 'Доступ к добавлению записи запрещен';
+                case 14: errorMessage = 'Требуется капча';
                     break;
-                default:
-                    errorMessage += data.error.error_msg;
+                case 15: errorMessage = 'Доступ запрещен. Проверьте права токена';
+                    break;
+                case 214: errorMessage = 'Нет прав на публикацию в группе';
+                    break;
+                default: errorMessage += data.error.error_msg || 'Неизвестная ошибка';
             }
             
             showNotification(errorMessage, 'error');
-            
-            // Сохраняем новость локально (даже если ошибка VK)
             saveNewsLocally(postText);
             
         } else if (data.response && data.response.post_id) {
-            // Успешная публикация в VK
             const postId = data.response.post_id;
-            
-            // Сохраняем новость локально
             saveNewsLocally(postText, postId);
             
-            // Показываем уведомление об успехе
             showNotification('Новость успешно опубликована в VK! 🎉', 'success');
             
-            // Очищаем форму и закрываем модальное окно
             setTimeout(() => {
                 clearVKForm();
                 closeVKPublishModal();
                 
-                // Обновляем список новостей
+                // Обновляем новости на странице
                 if (typeof loadVKNews === 'function') {
                     loadVKNews();
                 }
                 
                 showNotification('Готово! Новость появится на сайте', 'success');
-            }, 2000);
+            }, 1500);
             
         } else {
-            // Непонятный ответ от VK
-            console.warn('Неожиданный ответ от VK API:', data);
-            showNotification('Новость опубликована локально. Ответ VK не распознан', 'warning');
+            showNotification('Новость сохранена локально', 'warning');
             saveNewsLocally(postText);
         }
         
     } catch (networkError) {
-        // Ошибка сети или другие ошибки fetch
-        console.error('Network error:', networkError);
+        console.error('Ошибка сети:', networkError);
         showNotification('Ошибка сети. Новость сохранена локально', 'error');
         saveNewsLocally(postText);
     }
+    
+    // Восстанавливаем кнопку
+    if (publishBtn) {
+        publishBtn.disabled = false;
+        publishBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Опубликовать в VK';
+    }
 }
 
-// Сохранение новости локально
+// ========== ЗАГРУЗКА ИЗОБРАЖЕНИЙ В VK ==========
+async function getUploadServer() {
+    try {
+        const response = await fetch(
+            `https://api.vk.com/method/photos.getWallUploadServer?group_id=${VK_GROUP_ID}&access_token=${VK_ACCESS_TOKEN}&v=${VK_API_VERSION}`
+        );
+        const data = await response.json();
+        
+        if (data.response && data.response.upload_url) {
+            return data.response.upload_url;
+        } else {
+            console.error('Не удалось получить URL для загрузки:', data);
+            return null;
+        }
+    } catch (err) {
+        console.error('Ошибка получения сервера загрузки:', err);
+        return null;
+    }
+}
+
+async function uploadPhoto(uploadUrl, file) {
+    const formData = new FormData();
+    formData.append('photo', file);
+    
+    try {
+        const response = await fetch(uploadUrl, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        console.log('Результат загрузки фото:', data);
+        
+        if (data.server && data.photo && data.hash) {
+            // Сохраняем фото на сервере VK
+            const saveResponse = await fetch(
+                `https://api.vk.com/method/photos.saveWallPhoto?group_id=${VK_GROUP_ID}&server=${data.server}&photo=${encodeURIComponent(data.photo)}&hash=${data.hash}&access_token=${VK_ACCESS_TOKEN}&v=${VK_API_VERSION}`,
+                { method: 'POST' }
+            );
+            
+            const saveData = await saveResponse.json();
+            console.log('Фото сохранено:', saveData);
+            
+            if (saveData.response && saveData.response.length > 0) {
+                const photo = saveData.response[0];
+                return { owner_id: photo.owner_id, id: photo.id };
+            }
+        }
+        return null;
+    } catch (err) {
+        console.error('Ошибка загрузки фото:', err);
+        return null;
+    }
+}
+
+// ========== СОХРАНЕНИЕ НОВОСТИ ЛОКАЛЬНО ==========
 function saveNewsLocally(text, vkPostId = null) {
     let news = JSON.parse(localStorage.getItem('ucheba_vk_news')) || [];
     
     const newNews = {
         id: Date.now(),
         text: text,
-        date: 'только что',
+        date: new Date().toLocaleString('ru-RU'),
         fromVK: true,
         vkLink: vkPostId ? `https://vk.com/wall-${VK_GROUP_ID}_${vkPostId}` : null
     };
     
     news.unshift(newNews);
     
-    // Сохраняем только последние 20 новостей
     if (news.length > 20) {
         news = news.slice(0, 20);
     }
@@ -259,25 +384,15 @@ function saveNewsLocally(text, vkPostId = null) {
     return newNews;
 }
 
-// Очистка формы
-function clearVKForm() {
-    document.getElementById('vkPostText').value = '';
-    postAttachments = [];
-    
-    updateCharCounter();
-    updateImagePreview();
-}
-
-// Показать уведомление
+// ========== УВЕДОМЛЕНИЯ ==========
 function showNotification(message, type = 'info') {
-    // Создаем контейнер уведомлений
     let container = document.getElementById('vkNotifications');
     if (!container) {
         container = document.createElement('div');
         container.id = 'vkNotifications';
         container.style.cssText = `
             position: fixed;
-            top: 20px;
+            bottom: 20px;
             right: 20px;
             z-index: 10000;
             display: flex;
@@ -287,11 +402,23 @@ function showNotification(message, type = 'info') {
         document.body.appendChild(container);
     }
     
-    // Создаем уведомление
+    const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6'
+    };
+    
+    const icons = {
+        success: 'check-circle',
+        error: 'exclamation-circle',
+        warning: 'exclamation-triangle',
+        info: 'info-circle'
+    };
+    
     const notification = document.createElement('div');
-    notification.className = `vk-notification vk-notification-${type}`;
     notification.style.cssText = `
-        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
+        background: ${colors[type] || '#3b82f6'};
         color: white;
         padding: 12px 20px;
         border-radius: 8px;
@@ -300,22 +427,18 @@ function showNotification(message, type = 'info') {
         display: flex;
         align-items: center;
         gap: 10px;
-        min-width: 300px;
+        min-width: 280px;
         max-width: 400px;
+        font-size: 14px;
     `;
     
-    const icon = type === 'success' ? 'check-circle' : 
-                 type === 'error' ? 'exclamation-circle' : 
-                 type === 'warning' ? 'exclamation-triangle' : 'info-circle';
-    
     notification.innerHTML = `
-        <i class="fas fa-${icon}"></i>
+        <i class="fas fa-${icons[type] || 'info-circle'}"></i>
         <span>${message}</span>
     `;
     
     container.appendChild(notification);
     
-    // Удаляем через 5 секунд
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease forwards';
         setTimeout(() => {
@@ -326,43 +449,80 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-// Закрытие модального окна VK
-function closeVKPublishModal() {
-    const modal = document.getElementById('vkPublishModal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-}
-
-// Добавляем CSS стили для VK Publisher
+// ========== СТИЛИ ==========
 const vkStyles = `
     @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
     }
     
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
+    /* Стили для модального окна */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        overflow-y: auto;
+    }
+    
+    .modal-content {
+        background: white;
+        margin: 50px auto;
+        max-width: 700px;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        animation: slideDown 0.3s ease;
+        position: relative;
+    }
+    
+    @keyframes slideDown {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 25px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .modal-header h2 {
+        margin: 0;
+        font-size: 20px;
+        color: #1e293b;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        color: #94a3b8;
+        transition: color 0.3s;
+        padding: 0 5px;
+    }
+    
+    .modal-close:hover {
+        color: #ef4444;
+    }
+    
+    .modal-body {
+        padding: 25px;
     }
     
     .vk-publisher-container {
         background: white;
         border-radius: 12px;
-        padding: 25px;
     }
     
     .vk-form-group {
@@ -386,6 +546,7 @@ const vkStyles = `
         resize: vertical;
         min-height: 120px;
         transition: border-color 0.3s;
+        box-sizing: border-box;
     }
     
     .vk-textarea:focus {
@@ -430,18 +591,22 @@ const vkStyles = `
         opacity: 0.5;
     }
     
+    .empty-preview p {
+        margin: 0;
+    }
+    
     .image-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 15px;
-        margin-top: 15px;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
     }
     
     .image-item {
         position: relative;
         border-radius: 8px;
         overflow: hidden;
-        height: 150px;
+        aspect-ratio: 1;
     }
     
     .image-item img {
@@ -479,6 +644,11 @@ const vkStyles = `
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: transform 0.3s;
+    }
+    
+    .remove-image:hover {
+        transform: scale(1.1);
     }
     
     .vk-publish-info {
@@ -491,6 +661,7 @@ const vkStyles = `
         align-items: flex-start;
         gap: 10px;
         color: #0369a1;
+        font-size: 14px;
     }
     
     .vk-publish-info i {
@@ -501,130 +672,48 @@ const vkStyles = `
     .vk-actions {
         display: flex;
         gap: 15px;
-        margin-top: 30px;
+        margin-top: 25px;
         padding-top: 20px;
         border-top: 1px solid #e2e8f0;
+        flex-wrap: wrap;
     }
     
-    /* Стили для новостей на сайте */
-    .loading-news {
-        text-align: center;
-        padding: 40px;
-        color: #64748b;
+    .vk-actions .btn {
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+        padding: 12px 20px;
     }
     
-    .loading-news i {
-        font-size: 48px;
-        margin-bottom: 15px;
-        opacity: 0.7;
-    }
-    
-    .no-news {
-        text-align: center;
-        padding: 40px;
-        color: #64748b;
-    }
-    
-    .no-news i {
-        font-size: 48px;
-        margin-bottom: 15px;
-        opacity: 0.5;
-    }
-    
-    .news-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 25px;
-        margin-top: 30px;
-    }
-    
-    .news-card {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        border: 1px solid #e2e8f0;
-        transition: all 0.3s ease;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .news-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-    }
-    
-    .news-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-    
-    .news-date {
-        color: #64748b;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .news-vk-badge {
-        background: #4a76a8;
-        color: white;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-    
-    .news-content {
-        flex-grow: 1;
-        margin-bottom: 20px;
-    }
-    
-    .news-text {
+    .vk-actions .btn-outline {
+        background: transparent;
+        border: 2px solid #e2e8f0;
         color: #1e293b;
-        line-height: 1.6;
-        margin: 0;
-        white-space: pre-wrap;
-        word-break: break-word;
     }
     
-    .news-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 15px;
-        border-top: 1px solid #e2e8f0;
+    .vk-actions .btn-outline:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
     }
     
-    .news-number {
-        color: #94a3b8;
-        font-size: 14px;
-        font-weight: 600;
-    }
-    
-    /* Стили для социальных ссылок в футере */
-    .social-link {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #4a76a8;
-        text-decoration: none;
-        transition: color 0.3s;
-    }
-    
-    .social-link:hover {
-        color: #3a6698;
-        text-decoration: underline;
+    .vk-actions .btn-primary:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
     }
 `;
 
-// Добавляем стили в документ
-const styleSheet = document.createElement("style");
-styleSheet.textContent = vkStyles;
-document.head.appendChild(styleSheet);
+// Добавляем стили
+(function addStyles() {
+    if (!document.getElementById('vkPublisherStyles')) {
+        const styleSheet = document.createElement("style");
+        styleSheet.id = 'vkPublisherStyles';
+        styleSheet.textContent = vkStyles;
+        document.head.appendChild(styleSheet);
+    }
+})();
+
+// Инициализируем при загрузке DOM
+document.addEventListener('DOMContentLoaded', function() {
+    initVKPublisher();
+    console.log('✅ VK Publisher готов к работе!');
+});
