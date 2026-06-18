@@ -250,7 +250,7 @@
                     <a href="teacher.html">Репетиторы</a>
                 </nav>
                 <div class="header-actions" id="userAuthSection">
-                    <a href="login_simple.html" class="btn btn-primary">Войти</a>
+                    <a href="centered_login_local.html" class="btn btn-primary">Войти</a>
                 </div>
             </div>
         </div>
@@ -354,7 +354,7 @@
                     </div>
                 `;
             } else {
-                authSection.innerHTML = `<a href="login_simple.html" class="btn btn-primary">Войти</a>`;
+                authSection.innerHTML = `<a href="centered_login_local.html" class="btn btn-primary">Войти</a>`;
             }
         }
 
@@ -424,7 +424,7 @@
             }
             if (!currentUser) {
                 alert('Для записи на урок необходимо войти в систему.');
-                window.location.href = 'login_simple.html';
+                window.location.href = 'centered_login_local.html';
                 return;
             }
             const modal = document.getElementById('bookingModal');
